@@ -7,6 +7,7 @@ import {
   Building2,
   Bookmark,
   Menu,
+  Search,
 } from 'lucide-react';
 import { createClient } from '@/lib/shared/supabase/server';
 import { redirect } from 'next/navigation';
@@ -50,6 +51,16 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
         >
           <LayoutDashboard className="mr-2 h-4 w-4" />
           Dashboard
+        </Button>
+      </Link>
+      <Link href="/discover">
+        <Button
+          variant={isActive('/discover') ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          size="sm"
+        >
+          <Search className="mr-2 h-4 w-4" />
+          Discover
         </Button>
       </Link>
       <Link href="/cases">
