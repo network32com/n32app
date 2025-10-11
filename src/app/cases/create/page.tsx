@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
@@ -16,11 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import Link from 'next/link';
-import { createCase, uploadCaseImage } from '@/lib/backend/actions/case';
+import { Checkbox } from '@/components/ui/checkbox';
 import { PROCEDURE_TYPES } from '@/lib/shared/constants';
+import { createCase, uploadCaseImage } from '@/lib/backend/actions/case';
+import Link from 'next/link';
 import { Upload, X } from 'lucide-react';
 import Image from 'next/image';
+import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
 
 export default function CreateCasePage() {
   const router = useRouter();
@@ -115,21 +116,8 @@ export default function CreateCasePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/dashboard">
-            <h1 className="text-xl font-bold text-primary">Network32</h1>
-          </Link>
-          <Link href="/dashboard">
-            <Button variant="ghost">Cancel</Button>
-          </Link>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto max-w-3xl p-4 py-8">
+    <ClientDashboardLayout currentPath="/cases">
+      <div className="mx-auto max-w-2xl">
         <Card>
           <CardHeader>
             <CardTitle>Share a Clinical Case</CardTitle>
@@ -331,7 +319,7 @@ export default function CreateCasePage() {
             </form>
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </ClientDashboardLayout>
   );
 }

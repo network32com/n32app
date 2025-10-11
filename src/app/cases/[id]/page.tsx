@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { PROCEDURE_TYPES } from '@/lib/shared/constants';
 import { SaveButton } from '@/components/cases/save-button';
 import { ReportButton } from '@/components/cases/report-button';
+import { DashboardLayout } from '@/components/layout/dashboard-layout';
 
 interface CaseDetailPageProps {
   params: Promise<{ id: string }>;
@@ -57,23 +58,7 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/dashboard">
-            <h1 className="text-xl font-bold text-primary">Network32</h1>
-          </Link>
-          <div className="flex gap-2">
-            <Link href="/cases">
-              <Button variant="ghost">Back to Cases</Button>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto max-w-5xl p-4 py-8">
+    <DashboardLayout currentPath="/cases">
         {/* Title and Actions */}
         <div className="mb-6 flex items-start justify-between gap-4">
           <div className="flex-1">
@@ -200,7 +185,6 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
             </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 }

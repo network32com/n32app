@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { createClinic } from '@/lib/backend/actions/clinic';
+import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
 
 export default function CreateClinicPage() {
   const router = useRouter();
@@ -47,21 +48,8 @@ export default function CreateClinicPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/dashboard">
-            <h1 className="text-xl font-bold text-primary">Network32</h1>
-          </Link>
-          <Link href="/clinics">
-            <Button variant="ghost">Back to Clinics</Button>
-          </Link>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto max-w-2xl p-4 py-8">
+    <ClientDashboardLayout currentPath="/clinics">
+      <div className="mx-auto max-w-2xl">
         <Card>
           <CardHeader>
             <CardTitle>Create Clinic</CardTitle>
@@ -165,7 +153,7 @@ export default function CreateClinicPage() {
             </form>
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </ClientDashboardLayout>
   );
 }
