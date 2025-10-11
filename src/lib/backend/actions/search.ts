@@ -9,7 +9,7 @@ export async function searchUsers(query: string) {
     .from('users')
     .select('id, full_name, headline, specialty, location, profile_photo_url, degree')
     .or(
-      `full_name.ilike.%${query}%,headline.ilike.%${query}%,location.ilike.%${query}%,specialty.ilike.%${query}%`
+      `full_name.ilike.%${query}%,headline.ilike.%${query}%,location.ilike.%${query}%,degree.ilike.%${query}%`
     )
     .limit(20);
 
