@@ -1,5 +1,6 @@
-// Database types will be generated from Supabase
-// For now, we'll define the core types manually
+// Database types for Network32
+// These types match the Supabase schema defined in /supabase/migrations
+// To regenerate from Supabase: npx supabase gen types typescript --project-id YOUR_PROJECT_ID > src/lib/shared/types/database.types.ts
 
 export type UserRole = 'dentist' | 'clinic_owner';
 
