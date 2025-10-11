@@ -83,7 +83,7 @@ export default async function ClinicsPage() {
                 <CardContent>
                   <div className="flex gap-2">
                     <Link href={`/clinics/${clinic.id}`}>
-                      <Button variant="outline">View</Button>
+                      <Button>View Clinic</Button>
                     </Link>
                     <Link href={`/clinics/${clinic.id}/edit`}>
                       <Button variant="outline">Edit</Button>
