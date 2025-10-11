@@ -15,13 +15,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SPECIALTIES } from '@/lib/shared/constants';
 import type { User, Specialty } from '@/lib/shared/types/database.types';
+import { Upload, X } from 'lucide-react';
+import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
 
 export default function ProfileEditPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -32,7 +36,11 @@ export default function ProfileEditPage() {
     specialty: undefined,
     location: '',
     bio: '',
+    profile_photo_url: '',
   });
+
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -64,6 +72,51 @@ export default function ProfileEditPage() {
     loadProfile();
   }, [router]);
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Photo size must be less than 5MB');
+        return;
+      }
+
+      setPhotoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removePhoto = () => {
+    setPhotoFile(null);
+    setPhotoPreview(null);
+  };
+
+  const uploadPhoto = async (userId: string, file: File): Promise<string> => {
+    const supabase = createClient();
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}-${Date.now()}.${fileExt}`;
+    const filePath = `profile-photos/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('profile-photos')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true,
+      });
+
+    if (uploadError) throw uploadError;
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('profile-photos').getPublicUrl(filePath);
+
+    return publicUrl;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -78,6 +131,15 @@ export default function ProfileEditPage() {
 
       if (!user) throw new Error('Not authenticated');
 
+      let photoUrl = profile.profile_photo_url;
+
+      // Upload new photo if selected
+      if (photoFile) {
+        setUploadingPhoto(true);
+        photoUrl = await uploadPhoto(user.id, photoFile);
+        setUploadingPhoto(false);
+      }
+
       const { error: updateError } = await supabase
         .from('users')
         .update({
@@ -87,6 +149,7 @@ export default function ProfileEditPage() {
           specialty: profile.specialty,
           location: profile.location,
           bio: profile.bio,
+          profile_photo_url: photoUrl,
         })
         .eq('id', user.id);
 
@@ -94,26 +157,37 @@ export default function ProfileEditPage() {
 
       setSuccess(true);
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push(`/profile/${user.id}`);
       }, 1500);
     } catch (err: any) {
       setError(err.message || 'Failed to update profile');
-    } finally {
       setSubmitting(false);
+      setUploadingPhoto(false);
     }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p>Loading...</p>
-      </div>
+      <ClientDashboardLayout currentPath="/profile">
+        <div className="flex min-h-[400px] items-center justify-center">
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </ClientDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 py-8">
-      <div className="container mx-auto max-w-2xl">
+    <ClientDashboardLayout currentPath="/profile">
+      <div className="mx-auto max-w-2xl">
         <Card>
           <CardHeader>
             <CardTitle>Edit Profile</CardTitle>
@@ -121,6 +195,58 @@ export default function ProfileEditPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Profile Photo Upload */}
+              <div className="space-y-4">
+                <Label>Profile Photo</Label>
+                <div className="flex items-center gap-6">
+                  {/* Avatar Preview */}
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage
+                      src={photoPreview || profile.profile_photo_url || undefined}
+                      alt={profile.full_name || 'Profile'}
+                    />
+                    <AvatarFallback className="text-2xl">
+                      {profile.full_name ? getInitials(profile.full_name) : 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  {/* Upload Controls */}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2">
+                      <Label htmlFor="photo-upload" className="cursor-pointer">
+                        <div className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                          <Upload className="h-4 w-4" />
+                          {photoPreview || profile.profile_photo_url ? 'Change Photo' : 'Upload Photo'}
+                        </div>
+                      </Label>
+                      <Input
+                        id="photo-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoChange}
+                        className="hidden"
+                        disabled={submitting}
+                      />
+                      {(photoPreview || photoFile) && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={removePhoto}
+                          disabled={submitting}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      JPG, PNG or GIF. Max size 5MB.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Full Name */}
               <div className="space-y-2">
                 <Label htmlFor="full_name">Full Name *</Label>
                 <Input
@@ -132,28 +258,31 @@ export default function ProfileEditPage() {
                 />
               </div>
 
+              {/* Headline */}
               <div className="space-y-2">
                 <Label htmlFor="headline">Professional Headline</Label>
                 <Input
                   id="headline"
-                  placeholder="e.g., Cosmetic Dentist | Implant Specialist"
                   value={profile.headline || ''}
                   onChange={(e) => setProfile({ ...profile, headline: e.target.value })}
                   disabled={submitting}
+                  placeholder="e.g., Cosmetic Dentist specializing in smile makeovers"
                 />
               </div>
 
+              {/* Degree */}
               <div className="space-y-2">
                 <Label htmlFor="degree">Degree</Label>
                 <Input
                   id="degree"
-                  placeholder="e.g., DDS, DMD, BDS"
                   value={profile.degree || ''}
                   onChange={(e) => setProfile({ ...profile, degree: e.target.value })}
                   disabled={submitting}
+                  placeholder="e.g., DDS, DMD, BDS"
                 />
               </div>
 
+              {/* Specialty */}
               <div className="space-y-2">
                 <Label htmlFor="specialty">Specialty</Label>
                 <Select
@@ -164,7 +293,7 @@ export default function ProfileEditPage() {
                   disabled={submitting}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select your specialty" />
+                    <SelectValue placeholder="Select specialty" />
                   </SelectTrigger>
                   <SelectContent>
                     {SPECIALTIES.map((specialty) => (
@@ -176,50 +305,59 @@ export default function ProfileEditPage() {
                 </Select>
               </div>
 
+              {/* Location */}
               <div className="space-y-2">
                 <Label htmlFor="location">Location</Label>
                 <Input
                   id="location"
-                  placeholder="e.g., New York, NY"
                   value={profile.location || ''}
                   onChange={(e) => setProfile({ ...profile, location: e.target.value })}
                   disabled={submitting}
+                  placeholder="e.g., New York, NY"
                 />
               </div>
 
+              {/* Bio */}
               <div className="space-y-2">
                 <Label htmlFor="bio">Bio</Label>
                 <Textarea
                   id="bio"
-                  placeholder="Tell us about yourself and your practice..."
                   value={profile.bio || ''}
                   onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                  rows={4}
                   disabled={submitting}
+                  rows={4}
+                  placeholder="Tell us about yourself and your practice..."
                 />
               </div>
 
+              {/* Error Message */}
               {error && (
                 <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
                   {error}
                 </div>
               )}
 
+              {/* Success Message */}
               {success && (
                 <div className="rounded-md bg-primary/10 p-3 text-sm text-primary">
                   Profile updated successfully! Redirecting...
                 </div>
               )}
 
-              <div className="flex gap-4">
-                <Button type="submit" disabled={submitting} className="flex-1">
-                  {submitting ? 'Saving...' : 'Save Profile'}
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Button type="submit" disabled={submitting || uploadingPhoto}>
+                  {uploadingPhoto
+                    ? 'Uploading Photo...'
+                    : submitting
+                      ? 'Saving...'
+                      : 'Save Changes'}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => router.push('/dashboard')}
-                  disabled={submitting}
+                  disabled={submitting || uploadingPhoto}
                 >
                   Cancel
                 </Button>
@@ -228,6 +366,6 @@ export default function ProfileEditPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </ClientDashboardLayout>
   );
 }
