@@ -8,6 +8,8 @@ import {
   Bookmark,
   Menu,
   Search,
+  Bell,
+  MessageSquare,
 } from 'lucide-react';
 import { createClient } from '@/lib/shared/supabase/server';
 import { redirect } from 'next/navigation';
@@ -16,6 +18,7 @@ import {
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { UserMenu } from './user-menu';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -35,7 +38,7 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
 
   const { data: userData } = await supabase
     .from('users')
-    .select('role, full_name')
+    .select('role, full_name, email, profile_photo_url')
     .eq('id', user.id)
     .single();
 
@@ -151,15 +154,30 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
             </Link>
           </div>
 
-          <div className="ml-auto flex items-center gap-4">
-            <span className="hidden text-sm text-muted-foreground sm:inline">
-              Welcome, {userData?.full_name}
-            </span>
-            <form action="/auth/logout" method="POST">
-              <Button type="submit" variant="outline" size="sm">
-                Logout
-              </Button>
-            </form>
+          {/* Right side actions */}
+          <div className="ml-auto flex items-center gap-2">
+            {/* Future: Notifications */}
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5" />
+              {/* <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" /> */}
+            </Button>
+
+            {/* Future: Messages */}
+            <Button variant="ghost" size="icon">
+              <MessageSquare className="h-5 w-5" />
+            </Button>
+
+            {/* User Menu */}
+            {userData && (
+              <UserMenu
+                user={{
+                  id: user.id,
+                  full_name: userData.full_name,
+                  email: userData.email,
+                  profile_photo_url: userData.profile_photo_url,
+                }}
+              />
+            )}
           </div>
         </header>
 
