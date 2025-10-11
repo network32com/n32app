@@ -6,10 +6,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { getCase, hasSavedCase, incrementCaseViews } from '@/lib/backend/actions/case';
+import { hasUserReportedCase } from '@/lib/backend/actions/report';
 import { Eye, Bookmark, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import { PROCEDURE_TYPES } from '@/lib/shared/constants';
 import { SaveButton } from '@/components/cases/save-button';
+import { ReportButton } from '@/components/cases/report-button';
 
 interface CaseDetailPageProps {
   params: Promise<{ id: string }>;
@@ -36,7 +38,10 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
     redirect('/cases');
   }
 
-  const isSaved = await hasSavedCase(user.id, id);
+  const [isSaved, hasReported] = await Promise.all([
+    hasSavedCase(user.id, id),
+    hasUserReportedCase(user.id, id),
+  ]);
   const isOwner = caseData.user_id === user.id;
 
   const getProcedureLabel = (value: string) => {
@@ -92,7 +97,10 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
             </div>
           </div>
           {!isOwner && (
-            <SaveButton caseId={id} userId={user.id} initialIsSaved={isSaved} />
+            <div className="flex gap-2">
+              <SaveButton caseId={id} userId={user.id} initialIsSaved={isSaved} />
+              <ReportButton caseId={id} userId={user.id} hasReported={hasReported} />
+            </div>
           )}
         </div>
 

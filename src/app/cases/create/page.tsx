@@ -273,6 +273,19 @@ export default function CreateCasePage() {
                 </p>
               </div>
 
+              {/* Anonymization Guidelines */}
+              <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-4">
+                <h4 className="mb-2 font-semibold text-amber-900 dark:text-amber-100">
+                  ⚠️ Patient Privacy Guidelines
+                </h4>
+                <ul className="space-y-1 text-sm text-amber-800 dark:text-amber-200">
+                  <li>• Remove all patient identifying information from images</li>
+                  <li>• Ensure faces, tattoos, and unique features are not visible</li>
+                  <li>• Do not include patient names, dates of birth, or medical record numbers</li>
+                  <li>• Verify images meet HIPAA de-identification standards</li>
+                </ul>
+              </div>
+
               {/* Patient Consent */}
               <div className="rounded-lg border border-border bg-muted/50 p-4">
                 <div className="flex items-start space-x-3">
