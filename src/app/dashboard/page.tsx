@@ -71,9 +71,14 @@ export default async function DashboardPage() {
               <CardTitle>Clinical Cases</CardTitle>
               <CardDescription>Share and view clinical cases</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-2">
               <Link href="/cases">
-                <Button className="w-full">View Cases</Button>
+                <Button className="w-full" variant="outline">
+                  Browse Cases
+                </Button>
+              </Link>
+              <Link href="/cases/create">
+                <Button className="w-full">Share a Case</Button>
               </Link>
             </CardContent>
           </Card>

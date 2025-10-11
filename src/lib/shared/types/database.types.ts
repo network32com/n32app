@@ -76,6 +76,9 @@ export interface ClinicalCase {
   updated_at: string;
 }
 
+// Alias for convenience
+export type Case = ClinicalCase;
+
 export interface Follow {
   id: string;
   follower_id: string;
