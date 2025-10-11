@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { getUserClinics } from '@/lib/backend/actions/clinic';
+import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import { Plus } from 'lucide-react';
 
 export default async function ClinicsPage() {
   const supabase = await createClient();
@@ -30,28 +32,17 @@ export default async function ClinicsPage() {
   const clinics = await getUserClinics(user.id);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/dashboard">
-            <h1 className="text-xl font-bold text-primary">Network32</h1>
-          </Link>
-          <Link href="/dashboard">
-            <Button variant="ghost">Dashboard</Button>
-          </Link>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto max-w-4xl p-4 py-8">
-        <div className="mb-8 flex items-center justify-between">
+    <DashboardLayout currentPath="/clinics">
+        <div className="mb-8 flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-bold">My Clinics</h1>
             <p className="mt-2 text-muted-foreground">Manage your clinic profiles</p>
           </div>
           <Link href="/clinics/create">
-            <Button>Create Clinic</Button>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Clinic
+            </Button>
           </Link>
         </div>
 
@@ -103,7 +94,6 @@ export default async function ClinicsPage() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+    </DashboardLayout>
   );
 }

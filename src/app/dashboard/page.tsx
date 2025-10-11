@@ -3,18 +3,10 @@ import { createClient } from '@/lib/shared/supabase/server';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
-import {
-  LayoutDashboard,
-  FileText,
-  Users,
-  Building2,
-  TrendingUp,
-  Eye,
-  Bookmark,
-  UserPlus,
-} from 'lucide-react';
+import { FileText, Eye, Bookmark, UserPlus } from 'lucide-react';
 import { getUserCases, getSavedCases } from '@/lib/backend/actions/case';
 import { getFollowerCount, getFollowingCount } from '@/lib/backend/actions/profile';
+import { DashboardLayout } from '@/components/layout/dashboard-layout';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -48,65 +40,7 @@ export default async function DashboardPage() {
   const totalViews = userCases.reduce((sum, c) => sum + (c.views_count || 0), 0);
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Sidebar */}
-      <aside className="hidden w-64 border-r border-border bg-card lg:block">
-        <div className="flex h-16 items-center border-b border-border px-6">
-          <Link href="/dashboard">
-            <h1 className="text-xl font-bold text-primary">Network32</h1>
-          </Link>
-        </div>
-        <nav className="space-y-1 p-4">
-          <Link href="/dashboard">
-            <Button variant="secondary" className="w-full justify-start" size="sm">
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              Dashboard
-            </Button>
-          </Link>
-          <Link href="/cases">
-            <Button variant="ghost" className="w-full justify-start" size="sm">
-              <FileText className="mr-2 h-4 w-4" />
-              Clinical Cases
-            </Button>
-          </Link>
-          <Link href="/profile/edit">
-            <Button variant="ghost" className="w-full justify-start" size="sm">
-              <Users className="mr-2 h-4 w-4" />
-              My Profile
-            </Button>
-          </Link>
-          {userData.role === 'clinic_owner' && (
-            <Link href="/clinics">
-              <Button variant="ghost" className="w-full justify-start" size="sm">
-                <Building2 className="mr-2 h-4 w-4" />
-                My Clinics
-              </Button>
-            </Link>
-          )}
-        </nav>
-      </aside>
-
-      {/* Main Content */}
-      <div className="flex-1">
-        {/* Header */}
-        <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
-          <div className="flex items-center gap-4 lg:hidden">
-            <Link href="/dashboard">
-              <h1 className="text-xl font-bold text-primary">Network32</h1>
-            </Link>
-          </div>
-          <div className="ml-auto flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">Welcome, {userData.full_name}</span>
-            <form action="/auth/logout" method="POST">
-              <Button type="submit" variant="outline" size="sm">
-                Logout
-              </Button>
-            </form>
-          </div>
-        </header>
-
-        {/* Dashboard Content */}
-        <main className="p-6">
+    <DashboardLayout currentPath="/dashboard">
           <div className="mb-8">
             <h2 className="text-3xl font-bold">Dashboard</h2>
             <p className="mt-2 text-muted-foreground">
@@ -226,8 +160,6 @@ export default async function DashboardPage() {
               </CardContent>
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+    </DashboardLayout>
   );
 }

@@ -6,9 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { getAllCases } from '@/lib/backend/actions/case';
-import { Eye, Bookmark } from 'lucide-react';
+import { Eye, Bookmark, Plus } from 'lucide-react';
 import Image from 'next/image';
 import { PROCEDURE_TYPES } from '@/lib/shared/constants';
+import { DashboardLayout } from '@/components/layout/dashboard-layout';
 
 export default async function CasesPage() {
   const supabase = await createClient();
@@ -28,31 +29,20 @@ export default async function CasesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/dashboard">
-            <h1 className="text-xl font-bold text-primary">Network32</h1>
-          </Link>
-          <div className="flex gap-2">
-            <Link href="/cases/create">
-              <Button>Share Case</Button>
-            </Link>
-            <Link href="/dashboard">
-              <Button variant="ghost">Dashboard</Button>
-            </Link>
+    <DashboardLayout currentPath="/cases">
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Clinical Cases</h1>
+            <p className="mt-2 text-muted-foreground">
+              Explore cases shared by dental professionals
+            </p>
           </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto max-w-6xl p-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Clinical Cases</h1>
-          <p className="mt-2 text-muted-foreground">
-            Explore cases shared by dental professionals
-          </p>
+          <Link href="/cases/create">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Share Case
+            </Button>
+          </Link>
         </div>
 
         {cases.length === 0 ? (
@@ -168,7 +158,6 @@ export default async function CasesPage() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+    </DashboardLayout>
   );
 }
