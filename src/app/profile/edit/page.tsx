@@ -98,8 +98,8 @@ export default function ProfileEditPage() {
   const uploadPhoto = async (userId: string, file: File): Promise<string> => {
     const supabase = createClient();
     const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}-${Date.now()}.${fileExt}`;
-    const filePath = `profile-photos/${fileName}`;
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `${userId}/${fileName}`; // Changed to match RLS policy: userId/filename
 
     const { error: uploadError } = await supabase.storage
       .from('profile-photos')
