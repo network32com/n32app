@@ -119,11 +119,19 @@ export default function CasesPage() {
   return (
     <ClientDashboardLayout currentPath="/cases">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Clinical Cases</h1>
-        <p className="mt-2 text-muted-foreground">
-          Explore cases shared by dental professionals
-        </p>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Clinical Cases</h1>
+          <p className="mt-2 text-muted-foreground">
+            Explore cases shared by dental professionals
+          </p>
+        </div>
+        <Link href="/cases/create">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add Case
+          </Button>
+        </Link>
       </div>
 
       {/* Search and Filter Toolbar */}
