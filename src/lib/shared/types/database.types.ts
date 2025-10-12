@@ -109,3 +109,43 @@ export interface Report {
   created_at: string;
   updated_at: string;
 }
+
+export type ForumCategory =
+  | 'general'
+  | 'clinical_cases'
+  | 'techniques'
+  | 'equipment'
+  | 'practice_management'
+  | 'education'
+  | 'research'
+  | 'off_topic';
+
+export interface ForumThread {
+  id: string;
+  author_id: string;
+  title: string;
+  body: string;
+  category: ForumCategory;
+  tags: string[];
+  views_count: number;
+  replies_count: number;
+  is_pinned: boolean;
+  is_locked: boolean;
+  created_at: string;
+  updated_at: string;
+  last_activity_at: string;
+  users?: User;
+}
+
+export interface ForumReply {
+  id: string;
+  thread_id: string;
+  author_id: string;
+  parent_reply_id?: string;
+  body: string;
+  is_solution: boolean;
+  created_at: string;
+  updated_at: string;
+  users?: User;
+  replies?: ForumReply[];
+}

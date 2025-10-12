@@ -94,6 +94,16 @@ export function ClientDashboardLayout({ children, currentPath }: ClientDashboard
           Clinical Cases
         </Button>
       </Link>
+      <Link href="/forum">
+        <Button
+          variant={isActive('/forum') ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          size="sm"
+        >
+          <MessageSquare className="mr-2 h-4 w-4" />
+          Forum
+        </Button>
+      </Link>
       <Link href={`/profile/${user?.id}`}>
         <Button
           variant={isActive(`/profile/${user?.id}`) ? 'secondary' : 'ghost'}
