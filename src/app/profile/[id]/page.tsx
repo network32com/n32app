@@ -59,7 +59,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const { data: userCases } = await supabase
     .from('cases')
     .select('*')
-    .eq('author_id', id)
+    .eq('user_id', id)
     .order('created_at', { ascending: false })
     .limit(6);
 
