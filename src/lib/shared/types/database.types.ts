@@ -51,10 +51,13 @@ export interface Clinic {
   name: string;
   description?: string;
   location: string;
+  address?: string;
   phone?: string;
   email?: string;
   website?: string;
   logo_url?: string;
+  services?: string[];
+  operating_hours?: string;
   created_at: string;
   updated_at: string;
 }
