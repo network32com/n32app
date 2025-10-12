@@ -146,7 +146,7 @@ export function ClientDashboardLayout({ children, currentPath }: ClientDashboard
             <h1 className="text-xl font-bold text-primary">Network32</h1>
           </Link>
         </div>
-        <nav className="space-y-1 p-4">
+        <nav className="space-y-2 p-4">
           <NavLinks />
         </nav>
       </aside>
@@ -169,7 +169,7 @@ export function ClientDashboardLayout({ children, currentPath }: ClientDashboard
                     <h1 className="text-xl font-bold text-primary">Network32</h1>
                   </Link>
                 </div>
-                <nav className="space-y-1 p-4">
+                <nav className="space-y-2 p-4">
                   <NavLinks />
                 </nav>
               </SheetContent>
