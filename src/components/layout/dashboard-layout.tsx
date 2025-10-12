@@ -120,7 +120,7 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
             <h1 className="text-xl font-bold text-primary">Network32</h1>
           </Link>
         </div>
-        <nav className="space-y-2 p-4">
+        <nav className="flex flex-col gap-1.5 p-4">
           <NavLinks />
         </nav>
       </aside>
@@ -143,7 +143,7 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
                     <h1 className="text-xl font-bold text-primary">Network32</h1>
                   </Link>
                 </div>
-                <nav className="space-y-2 p-4">
+                <nav className="flex flex-col gap-1.5 p-4">
                   <NavLinks />
                 </nav>
               </SheetContent>
