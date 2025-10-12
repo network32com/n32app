@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/shared/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,11 +24,15 @@ import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layo
 
 export default function ProfileEditPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState(tabParam || 'basic');
 
   const [profile, setProfile] = useState<Partial<User>>({
     full_name: '',
@@ -246,7 +250,7 @@ export default function ProfileEditPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="basic" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="basic" className="flex items-center gap-2">
             <UserIcon className="h-4 w-4" />

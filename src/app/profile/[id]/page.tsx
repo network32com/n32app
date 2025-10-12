@@ -332,9 +332,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               <Award className="mx-auto h-12 w-12 text-muted-foreground" />
               <p className="mt-4 text-muted-foreground">No certifications added yet</p>
               {isOwnProfile && (
-                <Button className="mt-4" variant="outline">
-                  Add Certification
-                </Button>
+                <Link href="/profile/edit?tab=certifications">
+                  <Button className="mt-4" variant="outline">
+                    Add Certification
+                  </Button>
+                </Link>
               )}
             </CardContent>
           </Card>
@@ -347,9 +349,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               <Award className="mx-auto h-12 w-12 text-muted-foreground" />
               <p className="mt-4 text-muted-foreground">No achievements added yet</p>
               {isOwnProfile && (
-                <Button className="mt-4" variant="outline">
-                  Add Achievement
-                </Button>
+                <Link href="/profile/edit?tab=achievements">
+                  <Button className="mt-4" variant="outline">
+                    Add Achievement
+                  </Button>
+                </Link>
               )}
             </CardContent>
           </Card>
