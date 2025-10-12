@@ -1,12 +1,10 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { usePathname } from 'next/navigation';
+import { Home, FileText, Users, Building2, Menu } from 'lucide-react';
+import { Logo } from '@/components/ui/logo';
 import {
   LayoutDashboard,
-  FileText,
-  Users,
-  Building2,
   Bookmark,
-  Menu,
   Search,
   Bell,
   MessageSquare,
@@ -18,6 +16,7 @@ import {
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
 
 interface DashboardLayoutProps {
@@ -116,9 +115,7 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
       {/* Desktop Sidebar */}
       <aside className="hidden w-64 border-r border-border bg-card lg:block">
         <div className="flex h-16 items-center border-b border-border px-6">
-          <Link href="/dashboard">
-            <h1 className="text-xl font-bold text-primary">Network32</h1>
-          </Link>
+          <Logo />
         </div>
         <nav className="flex flex-col gap-1.5 p-4">
           <NavLinks />
@@ -139,9 +136,7 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
               </SheetTrigger>
               <SheetContent side="left" className="w-64 p-0">
                 <div className="flex h-16 items-center border-b border-border px-6">
-                  <Link href="/dashboard">
-                    <h1 className="text-xl font-bold text-primary">Network32</h1>
-                  </Link>
+                  <Logo />
                 </div>
                 <nav className="flex flex-col gap-1.5 p-4">
                   <NavLinks />
@@ -149,9 +144,7 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
               </SheetContent>
             </Sheet>
 
-            <Link href="/dashboard" className="lg:hidden">
-              <h1 className="text-xl font-bold text-primary">Network32</h1>
-            </Link>
+            <Logo className="lg:hidden" />
           </div>
 
           {/* Right side actions */}

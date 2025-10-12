@@ -4,23 +4,15 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/shared/supabase/client';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import {
-  LayoutDashboard,
-  FileText,
-  Users,
-  Building2,
-  Bookmark,
-  Menu,
-  Search,
-  Bell,
-  MessageSquare,
-} from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { Home, FileText, Users, Building2, Menu, Search, Bell, MessageSquare, LayoutDashboard, Bookmark } from 'lucide-react';
+import { Logo } from '@/components/ui/logo';
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
 
 interface ClientDashboardLayoutProps {
@@ -142,9 +134,7 @@ export function ClientDashboardLayout({ children, currentPath }: ClientDashboard
       {/* Desktop Sidebar */}
       <aside className="hidden w-64 border-r border-border bg-card lg:block">
         <div className="flex h-16 items-center border-b border-border px-6">
-          <Link href="/dashboard">
-            <h1 className="text-xl font-bold text-primary">Network32</h1>
-          </Link>
+          <Logo />
         </div>
         <nav className="flex flex-col gap-1.5 p-4">
           <NavLinks />
@@ -165,9 +155,7 @@ export function ClientDashboardLayout({ children, currentPath }: ClientDashboard
               </SheetTrigger>
               <SheetContent side="left" className="w-64 p-0">
                 <div className="flex h-16 items-center border-b border-border px-6">
-                  <Link href="/dashboard">
-                    <h1 className="text-xl font-bold text-primary">Network32</h1>
-                  </Link>
+                  <Logo />
                 </div>
                 <nav className="flex flex-col gap-1.5 p-4">
                   <NavLinks />
@@ -175,9 +163,7 @@ export function ClientDashboardLayout({ children, currentPath }: ClientDashboard
               </SheetContent>
             </Sheet>
 
-            <Link href="/dashboard" className="lg:hidden">
-              <h1 className="text-xl font-bold text-primary">Network32</h1>
-            </Link>
+            <Logo className="lg:hidden" />
           </div>
 
           {/* Right side actions */}
