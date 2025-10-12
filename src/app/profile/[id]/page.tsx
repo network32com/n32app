@@ -18,7 +18,6 @@ import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import {
   MapPin,
   Mail,
-  Phone,
   Globe,
   Linkedin,
   Share2,
@@ -221,19 +220,13 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     <span className="text-sm">{profile.email}</span>
                   </div>
                 )}
-                {profile.phone && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{profile.phone}</span>
-                  </div>
-                )}
                 {profile.location && (
                   <div className="flex items-center gap-3">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">{profile.location}</span>
                   </div>
                 )}
-                {!profile.email && !profile.phone && (
+                {!profile.email && !profile.location && (
                   <p className="text-sm text-muted-foreground">No contact information available</p>
                 )}
               </CardContent>
