@@ -186,44 +186,69 @@ export default async function ClinicPage({ params }: ClinicPageProps) {
                   Contact Information
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-4">
                 {clinic.phone && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <a href={`tel:${clinic.phone}`} className="text-sm hover:underline">
-                      {clinic.phone}
-                    </a>
+                  <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                    <Phone className="h-4 w-4 text-blue-600" />
+                    <div className="flex-1">
+                      <p className="text-xs text-muted-foreground">Phone</p>
+                      <a href={`tel:${clinic.phone}`} className="text-sm font-medium hover:underline">
+                        {clinic.phone}
+                      </a>
+                    </div>
                   </div>
                 )}
                 {clinic.email && (
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <a href={`mailto:${clinic.email}`} className="text-sm hover:underline">
-                      {clinic.email}
-                    </a>
+                  <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                    <Mail className="h-4 w-4 text-blue-600" />
+                    <div className="flex-1">
+                      <p className="text-xs text-muted-foreground">Email</p>
+                      <a href={`mailto:${clinic.email}`} className="text-sm font-medium hover:underline">
+                        {clinic.email}
+                      </a>
+                    </div>
                   </div>
                 )}
                 {clinic.website && (
-                  <div className="flex items-center gap-3">
-                    <Globe className="h-4 w-4 text-muted-foreground" />
-                    <a
-                      href={clinic.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm hover:underline"
-                    >
-                      {clinic.website}
-                    </a>
+                  <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                    <Globe className="h-4 w-4 text-blue-600" />
+                    <div className="flex-1">
+                      <p className="text-xs text-muted-foreground">Website</p>
+                      <a
+                        href={clinic.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium hover:underline"
+                      >
+                        {clinic.website}
+                      </a>
+                    </div>
                   </div>
                 )}
                 {clinic.address && (
-                  <div className="flex items-start gap-3">
-                    <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{clinic.address}</span>
+                  <div className="flex items-start gap-3 rounded-lg bg-muted/50 p-3">
+                    <MapPin className="mt-1 h-4 w-4 text-blue-600" />
+                    <div className="flex-1">
+                      <p className="text-xs text-muted-foreground">Address</p>
+                      <p className="text-sm font-medium leading-relaxed">{clinic.address}</p>
+                    </div>
                   </div>
                 )}
                 {!clinic.phone && !clinic.email && !clinic.website && !clinic.address && (
-                  <p className="text-sm text-muted-foreground">No contact information available</p>
+                  <div className="text-center py-6">
+                    <p className="text-sm text-muted-foreground">
+                      {isOwner
+                        ? 'No contact information added. Edit your clinic to add details.'
+                        : 'No contact information available'}
+                    </p>
+                    {isOwner && (
+                      <Link href={`/clinics/${id}/edit`} className="mt-3 inline-block">
+                        <Button variant="outline" size="sm">
+                          Add Contact Info
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -238,35 +263,65 @@ export default async function ClinicPage({ params }: ClinicPageProps) {
               </CardHeader>
               <CardContent>
                 {clinic.operating_hours ? (
-                  <p className="whitespace-pre-wrap text-sm text-muted-foreground">
-                    {clinic.operating_hours}
-                  </p>
+                  <div className="space-y-2">
+                    <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                      {clinic.operating_hours}
+                    </p>
+                  </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No operating hours specified</p>
+                  <div className="text-center py-6">
+                    <p className="text-sm text-muted-foreground">
+                      {isOwner
+                        ? 'No operating hours set. Edit your clinic to add hours.'
+                        : 'Operating hours not available'}
+                    </p>
+                    {isOwner && (
+                      <Link href={`/clinics/${id}/edit`} className="mt-3 inline-block">
+                        <Button variant="outline" size="sm">
+                          Add Hours
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
                 )}
               </CardContent>
             </Card>
 
             {/* Services */}
-            {clinic.services && clinic.services.length > 0 && (
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Building2 className="h-5 w-5 text-blue-600" />
-                    Services Offered
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-blue-600" />
+                  Services Offered
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {clinic.services && clinic.services.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {clinic.services.map((service: string, idx: number) => (
-                      <Badge key={idx} variant="secondary">
+                      <Badge key={idx} variant="secondary" className="px-3 py-1">
                         {service}
                       </Badge>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-muted-foreground">
+                      {isOwner
+                        ? 'No services added yet. Edit your clinic to add services.'
+                        : 'No services listed'}
+                    </p>
+                    {isOwner && (
+                      <Link href={`/clinics/${id}/edit`} className="mt-3 inline-block">
+                        <Button variant="outline" size="sm">
+                          Add Services
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
