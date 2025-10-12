@@ -165,10 +165,11 @@ export default function DiscoverPage() {
         </p>
       </div>
 
-      {/* Sticky Search Bar */}
-      <div className="sticky top-0 z-10 mb-6 rounded-lg border bg-card p-4 shadow-sm">
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="relative flex-1">
+      {/* Search and Filter Toolbar */}
+      <div className="mb-6 rounded-lg border bg-card p-4 shadow-sm">
+        <div className="flex flex-col gap-4">
+          {/* Search Bar */}
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
@@ -178,45 +179,68 @@ export default function DiscoverPage() {
               className="pl-10"
             />
           </div>
-          <Button type="submit">Search</Button>
-        </form>
-      </div>
 
-      {/* Tabs with Contextual Filters */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <TabsList className="w-full lg:w-auto">
-            <TabsTrigger value="professionals" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Professionals
-            </TabsTrigger>
-            <TabsTrigger value="cases" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Clinical Cases
-            </TabsTrigger>
-            <TabsTrigger value="clinics" className="flex items-center gap-2">
-              <Building2 className="h-4 w-4" />
-              Clinics
-            </TabsTrigger>
-          </TabsList>
+          {/* Tabs and Filters Row */}
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <TabsList className="w-full lg:w-auto">
+              <TabsTrigger value="professionals" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Professionals
+              </TabsTrigger>
+              <TabsTrigger value="cases" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Clinical Cases
+              </TabsTrigger>
+              <TabsTrigger value="clinics" className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                Clinics
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Contextual Filters */}
-          <div className="flex flex-wrap gap-2">
-            {activeTab === 'professionals' && (
-              <>
-                <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
+            {/* Contextual Filters */}
+            <div className="flex flex-wrap gap-2">
+              {activeTab === 'professionals' && (
+                <>
+                  <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="All Specialties" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Specialties</SelectItem>
+                      {SPECIALTIES.map((specialty) => (
+                        <SelectItem key={specialty.value} value={specialty.value}>
+                          {specialty.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="text"
+                    placeholder="Location..."
+                    value={locationFilter}
+                    onChange={(e) => setLocationFilter(e.target.value)}
+                    className="w-[180px]"
+                  />
+                </>
+              )}
+
+              {activeTab === 'cases' && (
+                <Select value={procedureFilter} onValueChange={setProcedureFilter}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Specialty" />
+                    <SelectValue placeholder="All Procedures" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Specialties</SelectItem>
-                    {SPECIALTIES.map((specialty) => (
-                      <SelectItem key={specialty.value} value={specialty.value}>
-                        {specialty.label}
+                    <SelectItem value="all">All Procedures</SelectItem>
+                    {PROCEDURE_TYPES.map((procedure) => (
+                      <SelectItem key={procedure.value} value={procedure.value}>
+                        {procedure.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+              )}
+
+              {activeTab === 'clinics' && (
                 <Input
                   type="text"
                   placeholder="Location..."
@@ -224,36 +248,14 @@ export default function DiscoverPage() {
                   onChange={(e) => setLocationFilter(e.target.value)}
                   className="w-[180px]"
                 />
-              </>
-            )}
-
-            {activeTab === 'cases' && (
-              <Select value={procedureFilter} onValueChange={setProcedureFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Procedure Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Procedures</SelectItem>
-                  {PROCEDURE_TYPES.map((procedure) => (
-                    <SelectItem key={procedure.value} value={procedure.value}>
-                      {procedure.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-
-            {activeTab === 'clinics' && (
-              <Input
-                type="text"
-                placeholder="City..."
-                value={locationFilter}
-                onChange={(e) => setLocationFilter(e.target.value)}
-                className="w-[180px]"
-              />
-            )}
+              )}
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Tabs Content */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
 
         {/* Professionals Tab */}
         <TabsContent value="professionals" className="space-y-6">
