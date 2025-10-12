@@ -99,7 +99,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                       <Card className="transition-shadow hover:shadow-lg">
                         <CardContent className="p-4">
                           <div className="flex items-start gap-3">
-                            <Avatar className="h-12 w-12">
+                            <Avatar className="h-12 w-12 rounded-lg">
                               <AvatarImage
                                 src={professional.profile_photo_url || undefined}
                                 alt={professional.full_name}
@@ -182,7 +182,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                     <Card key={clinic.id} className="transition-shadow hover:shadow-lg">
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
-                          <Avatar className="h-12 w-12">
+                          <Avatar className="h-12 w-12 rounded-lg">
                             <AvatarImage src={clinic.logo_url || undefined} alt={clinic.name} />
                             <AvatarFallback>
                               {clinic.name
@@ -213,7 +213,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                   <Card className="transition-shadow hover:shadow-lg">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
-                        <Avatar className="h-16 w-16">
+                        <Avatar className="h-16 w-16 rounded-lg">
                           <AvatarImage
                             src={professional.profile_photo_url || undefined}
                             alt={professional.full_name}
@@ -313,7 +313,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 <Card key={clinic.id} className="transition-shadow hover:shadow-lg">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <Avatar className="h-16 w-16">
+                      <Avatar className="h-16 w-16 rounded-lg">
                         <AvatarImage src={clinic.logo_url || undefined} alt={clinic.name} />
                         <AvatarFallback>
                           {clinic.name

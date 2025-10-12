@@ -305,7 +305,7 @@ export default function CasesPage() {
                 {/* Author Info */}
                 {caseItem.author && (
                   <div className="mb-3 flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
+                    <Avatar className="h-8 w-8 rounded-lg">
                       <AvatarImage
                         src={caseItem.author.profile_photo_url || undefined}
                         alt={caseItem.author.full_name}

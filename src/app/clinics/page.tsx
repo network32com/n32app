@@ -61,7 +61,7 @@ export default async function ClinicsPage() {
               <Card key={clinic.id}>
                 <CardHeader>
                   <div className="flex items-start gap-4">
-                    <Avatar className="h-16 w-16">
+                    <Avatar className="h-16 w-16 rounded-lg">
                       <AvatarImage src={clinic.logo_url || undefined} alt={clinic.name} />
                       <AvatarFallback>
                         {clinic.name

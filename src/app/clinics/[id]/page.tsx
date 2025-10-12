@@ -44,7 +44,7 @@ export default async function ClinicPage({ params }: ClinicPageProps) {
         <CardHeader>
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
             {/* Logo */}
-            <Avatar className="h-24 w-24">
+            <Avatar className="h-24 w-24 rounded-lg">
               <AvatarImage src={clinic.logo_url || undefined} alt={clinic.name} />
               <AvatarFallback className="text-2xl">
                 <Building2 className="h-12 w-12" />

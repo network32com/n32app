@@ -110,7 +110,7 @@ export default async function SavedCasesPage() {
                   {/* Author */}
                   <div className="mt-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8">
+                      <Avatar className="h-8 w-8 rounded-lg">
                         <AvatarImage
                           src={caseItem.users?.profile_photo_url || undefined}
                           alt={caseItem.users?.full_name}

@@ -271,7 +271,7 @@ export default function DiscoverPage() {
                   <Card className="h-full transition-shadow hover:shadow-lg">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
-                        <Avatar className="h-16 w-16">
+                        <Avatar className="h-16 w-16 rounded-lg">
                           <AvatarImage
                             src={professional.profile_photo_url || undefined}
                             alt={professional.full_name}
@@ -341,7 +341,7 @@ export default function DiscoverPage() {
                       )}
                       {caseItem.author && (
                         <div className="mt-3 flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
+                          <Avatar className="h-6 w-6 rounded">
                             <AvatarImage src={caseItem.author.profile_photo_url || undefined} />
                             <AvatarFallback className="text-xs">
                               {getInitials(caseItem.author.full_name)}
@@ -375,7 +375,7 @@ export default function DiscoverPage() {
                   <Card className="h-full transition-shadow hover:shadow-lg">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
-                        <Avatar className="h-16 w-16">
+                        <Avatar className="h-16 w-16 rounded-lg">
                           <AvatarImage src={clinic.logo_url || undefined} alt={clinic.name} />
                           <AvatarFallback>
                             <Building2 className="h-8 w-8" />
@@ -453,7 +453,7 @@ export default function DiscoverPage() {
                     href={`/profile/${professional.id}`}
                     className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-secondary"
                   >
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="h-10 w-10 rounded-lg">
                       <AvatarImage src={professional.profile_photo_url || undefined} />
                       <AvatarFallback className="text-xs">
                         {getInitials(professional.full_name)}

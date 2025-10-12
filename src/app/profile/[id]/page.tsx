@@ -74,7 +74,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         <CardContent className="p-6">
           <div className="flex flex-col gap-6 md:flex-row md:items-start">
             {/* Avatar */}
-            <Avatar className="h-32 w-32 border-4 border-blue-100 dark:border-blue-900">
+            <Avatar className="h-32 w-32 rounded-lg border-4 border-blue-100 dark:border-blue-900">
               <AvatarImage src={profile.profile_photo_url || undefined} alt={profile.full_name} />
               <AvatarFallback className="text-3xl">
                 {profile.full_name

@@ -200,13 +200,17 @@ export default function ProfileEditPage() {
                 <Label>Profile Photo</Label>
                 <div className="flex items-center gap-6">
                   {/* Avatar Preview */}
-                  <Avatar className="h-24 w-24">
+                  <Avatar className="h-24 w-24 rounded-lg">
                     <AvatarImage
                       src={photoPreview || profile.profile_photo_url || undefined}
                       alt={profile.full_name || 'Profile'}
                     />
                     <AvatarFallback className="text-2xl">
-                      {profile.full_name ? getInitials(profile.full_name) : 'U'}
+                      {profile.full_name
+                        ?.split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
 
