@@ -22,6 +22,14 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Compress responses
   compress: true,
+  // Ignore ESLint errors during build (warnings only)
+  eslint: {
+    ignoreDuringBuilds: false,
+  },
+  // Ignore TypeScript errors during build for now
+  typescript: {
+    ignoreBuildErrors: false,
+  },
 };
 
 export default nextConfig;
