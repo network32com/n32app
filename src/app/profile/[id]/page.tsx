@@ -290,7 +290,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
         {/* Clinical Cases Tab */}
         <TabsContent value="cases" className="space-y-6">
-          {caseCount === 0 ? (
+          {!userCases || userCases.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
                 <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
@@ -304,13 +304,27 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             </Card>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {userCases?.map((caseItem: any) => (
+              {userCases.map((caseItem: any) => (
                 <Link key={caseItem.id} href={`/cases/${caseItem.id}`}>
                   <Card className="group overflow-hidden transition-shadow hover:shadow-lg">
+                    {caseItem.before_image_url && (
+                      <div className="relative aspect-video overflow-hidden">
+                        <img
+                          src={caseItem.before_image_url}
+                          alt={caseItem.title}
+                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        />
+                      </div>
+                    )}
                     <CardContent className="p-4">
                       <h3 className="font-semibold line-clamp-2 group-hover:text-blue-600">
                         {caseItem.title}
                       </h3>
+                      {caseItem.procedure_type && (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {caseItem.procedure_type.replace(/_/g, ' ')}
+                        </p>
+                      )}
                       <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Eye className="h-4 w-4" />
