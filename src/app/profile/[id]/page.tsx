@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   getUserProfile,
   getFollowerCount,
@@ -309,10 +310,12 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   <Card className="group overflow-hidden transition-shadow hover:shadow-lg">
                     {caseItem.before_image_url && (
                       <div className="relative aspect-video overflow-hidden">
-                        <img
+                        <Image
                           src={caseItem.before_image_url}
                           alt={caseItem.title}
-                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                          fill
+                          className="object-cover transition-transform group-hover:scale-105"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                       </div>
                     )}
