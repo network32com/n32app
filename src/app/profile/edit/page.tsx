@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/shared/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,7 @@ import type { User, Specialty } from '@/lib/shared/types/database.types';
 import { Upload, X, User as UserIcon, GraduationCap, Award, Plus, Trash2 } from 'lucide-react';
 import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
 
-export default function ProfileEditPage() {
+function ProfileEditContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
@@ -698,5 +698,22 @@ export default function ProfileEditPage() {
         </TabsContent>
       </Tabs>
     </ClientDashboardLayout>
+  );
+}
+
+export default function ProfileEditPage() {
+  return (
+    <Suspense fallback={
+      <ClientDashboardLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading profile...</p>
+          </div>
+        </div>
+      </ClientDashboardLayout>
+    }>
+      <ProfileEditContent />
+    </Suspense>
   );
 }

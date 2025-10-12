@@ -332,7 +332,7 @@ export default function EditClinicPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Services & Operating Hours</CardTitle>
-                <CardDescription>What you offer and when you're available</CardDescription>
+                <CardDescription>What you offer and when you&apos;re available</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Services */}
@@ -434,7 +434,7 @@ export default function EditClinicPage() {
                     Logo and photo upload coming soon
                   </p>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    You'll be able to upload your clinic logo and photos
+                    You&apos;ll be able to upload your clinic logo and photos
                   </p>
                 </div>
 
