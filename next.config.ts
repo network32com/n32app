@@ -20,9 +20,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Compress responses
   compress: true,
-  // Allow ESLint warnings but fail on errors
+  // Ignore ESLint during builds (we run it separately in CI)
   eslint: {
-    ignoreDuringBuilds: false,
+    ignoreDuringBuilds: true,
   },
   // TypeScript type checking
   typescript: {
