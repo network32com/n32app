@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/shared/supabase/client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, FileText, Users, Building2, Menu, Search, Bell, MessageSquare, LayoutDashboard, Bookmark } from 'lucide-react';
+import { Home, FileText, Users, Building2, Menu, Search, Bell, MessageSquare, LayoutDashboard, Bookmark, Rss } from 'lucide-react';
 import { Logo } from '@/components/ui/logo';
 import {
   Sheet,
@@ -72,6 +72,16 @@ export function ClientDashboardLayout({ children, currentPath }: ClientDashboard
         >
           <LayoutDashboard className="mr-2 h-4 w-4" />
           Dashboard
+        </Button>
+      </Link>
+      <Link href="/feed">
+        <Button
+          variant={isActive('/feed') ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          size="sm"
+        >
+          <Rss className="mr-2 h-4 w-4" />
+          Feed
         </Button>
       </Link>
       <Link href="/discover">

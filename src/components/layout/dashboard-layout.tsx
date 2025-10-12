@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, FileText, Users, Building2, Menu } from 'lucide-react';
+import { Home, FileText, Users, Building2, Menu, Rss } from 'lucide-react';
 import { Logo } from '@/components/ui/logo';
 import {
   LayoutDashboard,
@@ -53,6 +53,16 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
         >
           <LayoutDashboard className="mr-2 h-4 w-4" />
           Dashboard
+        </Button>
+      </Link>
+      <Link href="/feed">
+        <Button
+          variant={isActive('/feed') ? 'secondary' : 'ghost'}
+          className="w-full justify-start"
+          size="sm"
+        >
+          <Rss className="mr-2 h-4 w-4" />
+          Feed
         </Button>
       </Link>
       <Link href="/discover">
