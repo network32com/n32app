@@ -13,6 +13,7 @@ import { PROCEDURE_TYPES } from '@/lib/shared/constants';
 import { SaveButton } from '@/components/cases/save-button';
 import { ReportButton } from '@/components/cases/report-button';
 import { DeleteCaseButton } from '@/components/cases/delete-button';
+import { CaseNotesDisplay } from '@/components/cases/case-notes-display';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 
 interface CaseDetailPageProps {
@@ -185,9 +186,7 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
-                  {caseData.case_notes}
-                </p>
+                <CaseNotesDisplay notes={caseData.case_notes} />
               </CardContent>
             </Card>
           )}

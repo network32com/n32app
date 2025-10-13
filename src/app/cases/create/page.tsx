@@ -107,11 +107,27 @@ export default function CreateCasePage() {
         uploadCaseImage(user.id, afterImage, 'after'),
       ]);
 
+      // Combine all notes into case_notes field
+      let combinedNotes = formData.case_notes || '';
+      
+      if (formData.treatment_duration) {
+        combinedNotes += `\n\n**Treatment Duration:** ${formData.treatment_duration}`;
+      }
+      if (formData.materials_used) {
+        combinedNotes += `\n\n**Materials Used:** ${formData.materials_used}`;
+      }
+      if (formData.challenges) {
+        combinedNotes += `\n\n**Challenges:** ${formData.challenges}`;
+      }
+      if (formData.outcome) {
+        combinedNotes += `\n\n**Outcome:** ${formData.outcome}`;
+      }
+
       // Create case
       const caseData = {
         title: formData.title,
         procedure_type: formData.procedure_type as any,
-        case_notes: formData.case_notes || undefined,
+        case_notes: combinedNotes.trim() || undefined,
         tags: formData.tags ? formData.tags.split(',').map((t) => t.trim()) : [],
         before_image_url: beforeUrl,
         after_image_url: afterUrl,
