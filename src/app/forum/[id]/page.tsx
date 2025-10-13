@@ -8,9 +8,10 @@ import Link from 'next/link';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { getForumThread, getThreadReplies } from '@/lib/backend/actions/forum';
 import { getCategoryLabel, getCategoryColor } from '@/lib/shared/constants/forum';
-import { MessageSquare, Eye, Clock, User, ArrowLeft, Share2 } from 'lucide-react';
+import { MessageSquare, Eye, Clock, User, ArrowLeft, Share2, Edit } from 'lucide-react';
 import { ReplyForm } from '@/components/forum/reply-form';
 import { ReplyItem } from '@/components/forum/reply-item';
+import { DeleteThreadButton } from '@/components/forum/delete-thread-button';
 
 interface ThreadPageProps {
   params: Promise<{ id: string }>;
@@ -127,9 +128,21 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
                     </div>
                   </div>
                 </div>
-                <Button variant="outline" size="icon">
-                  <Share2 className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-2">
+                  {isAuthor && (
+                    <>
+                      <Link href={`/forum/${id}/edit`}>
+                        <Button variant="outline" size="icon">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <DeleteThreadButton threadId={id} userId={user.id} />
+                    </>
+                  )}
+                  <Button variant="outline" size="icon">
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
 
               <div className="prose prose-sm max-w-none dark:prose-invert">

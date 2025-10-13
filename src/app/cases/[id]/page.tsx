@@ -7,11 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { getCase, hasSavedCase, incrementCaseViews } from '@/lib/backend/actions/case';
 import { hasUserReportedCase } from '@/lib/backend/actions/report';
-import { Eye, Bookmark, Calendar, Share2, Tag, FileText, User } from 'lucide-react';
+import { Eye, Bookmark, Calendar, Share2, Tag, FileText, User, Edit } from 'lucide-react';
 import Image from 'next/image';
 import { PROCEDURE_TYPES } from '@/lib/shared/constants';
 import { SaveButton } from '@/components/cases/save-button';
 import { ReportButton } from '@/components/cases/report-button';
+import { DeleteCaseButton } from '@/components/cases/delete-button';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 
 interface CaseDetailPageProps {
@@ -105,7 +106,16 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
 
             {/* Action Buttons */}
             <div className="flex gap-2">
-              {!isOwner && (
+              {isOwner ? (
+                <>
+                  <Link href={`/cases/${id}/edit`}>
+                    <Button variant="outline" size="icon">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <DeleteCaseButton caseId={id} userId={user.id} />
+                </>
+              ) : (
                 <>
                   <SaveButton caseId={id} userId={user.id} initialIsSaved={isSaved} />
                   <ReportButton caseId={id} userId={user.id} hasReported={hasReported} />

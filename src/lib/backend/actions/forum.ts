@@ -147,3 +147,40 @@ export async function deleteForumReply(replyId: string, userId: string): Promise
 
   if (error) throw error;
 }
+
+export async function updateForumThread(
+  threadId: string,
+  userId: string,
+  updates: { title?: string; body?: string; tags?: string[] }
+): Promise<ForumThread> {
+  const supabase = await createClient();
+
+  // First verify the user owns this thread
+  const { data: threadData, error: fetchError } = await supabase
+    .from('forum_threads')
+    .select('author_id')
+    .eq('id', threadId)
+    .single();
+
+  if (fetchError || !threadData) {
+    throw new Error('Thread not found');
+  }
+
+  if (threadData.author_id !== userId) {
+    throw new Error('Unauthorized: You can only edit your own threads');
+  }
+
+  const { data, error } = await supabase
+    .from('forum_threads')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', threadId)
+    .eq('author_id', userId)
+    .select('*, users(id, full_name, profile_photo_url, degree, specialty)')
+    .single();
+
+  if (error) throw error;
+  return data;
+}

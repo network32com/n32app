@@ -94,13 +94,29 @@ export async function getAllCases(limit: number = 20, offset: number = 0) {
   return data;
 }
 
-export async function updateCase(caseId: string, updates: Partial<Case>) {
+export async function updateCase(caseId: string, userId: string, updates: Partial<Case>) {
   const supabase = await createClient();
+
+  // First verify the user owns this case
+  const { data: caseData, error: fetchError } = await supabase
+    .from('cases')
+    .select('user_id')
+    .eq('id', caseId)
+    .single();
+
+  if (fetchError || !caseData) {
+    throw new Error('Case not found');
+  }
+
+  if (caseData.user_id !== userId) {
+    throw new Error('Unauthorized: You can only edit your own cases');
+  }
 
   const { data, error } = await supabase
     .from('cases')
     .update(updates)
     .eq('id', caseId)
+    .eq('user_id', userId)
     .select()
     .single();
 
@@ -114,10 +130,29 @@ export async function updateCase(caseId: string, updates: Partial<Case>) {
   return data as Case;
 }
 
-export async function deleteCase(caseId: string) {
+export async function deleteCase(caseId: string, userId: string) {
   const supabase = await createClient();
 
-  const { error } = await supabase.from('cases').delete().eq('id', caseId);
+  // First verify the user owns this case
+  const { data: caseData, error: fetchError } = await supabase
+    .from('cases')
+    .select('user_id')
+    .eq('id', caseId)
+    .single();
+
+  if (fetchError || !caseData) {
+    throw new Error('Case not found');
+  }
+
+  if (caseData.user_id !== userId) {
+    throw new Error('Unauthorized: You can only delete your own cases');
+  }
+
+  const { error } = await supabase
+    .from('cases')
+    .delete()
+    .eq('id', caseId)
+    .eq('user_id', userId);
 
   if (error) {
     throw new Error(error.message);
