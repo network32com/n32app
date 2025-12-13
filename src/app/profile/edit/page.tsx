@@ -20,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SPECIALTIES } from '@/lib/shared/constants';
 import type { User, Specialty } from '@/lib/shared/types/database.types';
 import { Upload, X, User as UserIcon, GraduationCap, Award, Plus, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
 
 function ProfileEditContent() {
@@ -62,6 +63,9 @@ function ProfileEditContent() {
     { title: '', description: '', year: '' },
   ]);
 
+  const [savingCertifications, setSavingCertifications] = useState(false);
+  const [savingAchievements, setSavingAchievements] = useState(false);
+
   useEffect(() => {
     const loadProfile = async () => {
       const supabase = createClient();
@@ -84,6 +88,42 @@ function ProfileEditContent() {
         setError('Failed to load profile');
       } else if (userData) {
         setProfile(userData);
+      }
+
+      // Load certifications and achievements
+      try {
+        const { data: certs } = await supabase
+          .from('user_certifications')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        if (certs && certs.length > 0) {
+          setCertifications(
+            certs.map((c: any) => ({
+              name: c.name || '',
+              issuer: c.issuer || '',
+              year: c.year || '',
+              credential: c.credential || '',
+            }))
+          );
+        }
+
+        const { data: achs } = await supabase
+          .from('user_achievements')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        if (achs && achs.length > 0) {
+          setAchievements(
+            achs.map((a: any) => ({
+              title: a.title || '',
+              description: a.description || '',
+              year: a.year || '',
+            }))
+          );
+        }
+      } catch (e) {
+        // ignore, surfaces via UI tabs as empty
       }
 
       setLoading(false);
@@ -229,6 +269,81 @@ function ProfileEditContent() {
     const updated = [...achievements];
     updated[index] = { ...updated[index], [field]: value };
     setAchievements(updated);
+  };
+
+  const saveCertifications = async () => {
+    try {
+      setSavingCertifications(true);
+      setError(null);
+      const supabase = createClient();
+      const { data: auth } = await supabase.auth.getUser();
+      const user = auth.user;
+      if (!user) throw new Error('Not authenticated');
+
+      const { error: delError } = await supabase
+        .from('user_certifications')
+        .delete()
+        .eq('user_id', user.id);
+      if (delError) throw delError;
+
+      const rows = certifications
+        .map((c) => ({
+          user_id: user.id,
+          name: (c.name || '').trim(),
+          issuer: c.issuer?.trim() || null,
+          year: c.year?.trim() || null,
+          credential: c.credential?.trim() || null,
+        }))
+        .filter((c) => c.name.length > 0);
+
+      if (rows.length > 0) {
+        const { error: insError } = await supabase.from('user_certifications').insert(rows);
+        if (insError) throw insError;
+      }
+      toast.success('Certifications saved');
+    } catch (err: any) {
+      setError(err.message || 'Failed to save certifications');
+      toast.error(err.message || 'Failed to save certifications');
+    } finally {
+      setSavingCertifications(false);
+    }
+  };
+
+  const saveAchievements = async () => {
+    try {
+      setSavingAchievements(true);
+      setError(null);
+      const supabase = createClient();
+      const { data: auth } = await supabase.auth.getUser();
+      const user = auth.user;
+      if (!user) throw new Error('Not authenticated');
+
+      const { error: delError } = await supabase
+        .from('user_achievements')
+        .delete()
+        .eq('user_id', user.id);
+      if (delError) throw delError;
+
+      const rows = achievements
+        .map((a) => ({
+          user_id: user.id,
+          title: (a.title || '').trim(),
+          description: a.description?.trim() || null,
+          year: a.year?.trim() || null,
+        }))
+        .filter((a) => a.title.length > 0);
+
+      if (rows.length > 0) {
+        const { error: insError } = await supabase.from('user_achievements').insert(rows);
+        if (insError) throw insError;
+      }
+      toast.success('Achievements saved');
+    } catch (err: any) {
+      setError(err.message || 'Failed to save achievements');
+      toast.error(err.message || 'Failed to save achievements');
+    } finally {
+      setSavingAchievements(false);
+    }
   };
 
   if (loading) {
@@ -610,8 +725,8 @@ function ProfileEditContent() {
               </Button>
 
               <div className="flex gap-2 pt-4">
-                <Button onClick={() => console.log('Save certifications:', certifications)}>
-                  Save Certifications
+                <Button onClick={saveCertifications} disabled={savingCertifications}>
+                  {savingCertifications ? 'Saving...' : 'Save Certifications'}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => router.back()}>
                   Cancel
@@ -686,8 +801,8 @@ function ProfileEditContent() {
               </Button>
 
               <div className="flex gap-2 pt-4">
-                <Button onClick={() => console.log('Save achievements:', achievements)}>
-                  Save Achievements
+                <Button onClick={saveAchievements} disabled={savingAchievements}>
+                  {savingAchievements ? 'Saving...' : 'Save Achievements'}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => router.back()}>
                   Cancel

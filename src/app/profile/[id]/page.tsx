@@ -13,7 +13,10 @@ import {
   getFollowingCount,
   getCaseCount,
   isFollowing,
+  getUserCertifications,
+  getUserAchievements,
 } from '@/lib/backend/actions/profile';
+import { SPECIALTIES } from '@/lib/shared/constants';
 import { FollowButton } from '@/components/profile/follow-button';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import {
@@ -49,11 +52,20 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     redirect('/dashboard');
   }
 
-  const [followerCount, followingCount, caseCount, isUserFollowing] = await Promise.all([
+  const [
+    followerCount,
+    followingCount,
+    caseCount,
+    isUserFollowing,
+    certifications,
+    achievements,
+  ] = await Promise.all([
     getFollowerCount(id),
     getFollowingCount(id),
     getCaseCount(id),
     currentUser ? isFollowing(currentUser.id, id) : Promise.resolve(false),
+    getUserCertifications(id),
+    getUserAchievements(id),
   ]);
 
   // Fetch user's cases
@@ -100,7 +112,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   <div className="mt-3 flex flex-wrap gap-2">
                     {profile.specialty && (
                       <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                        {profile.specialty.replace(/_/g, ' ')}
+                        {SPECIALTIES.find((s) => s.value === profile.specialty)?.label ?? profile.specialty.replace(/_/g, ' ')}
                       </Badge>
                     )}
                     <Badge variant="secondary">{profile.role.replace(/_/g, ' ')}</Badge>
@@ -252,7 +264,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   <div>
                     <p className="text-sm font-medium">Specialty</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {profile.specialty.replace(/_/g, ' ')}
+                      {SPECIALTIES.find((s) => s.value === profile.specialty)?.label ?? profile.specialty.replace(/_/g, ' ')}
                     </p>
                   </div>
                 )}
@@ -345,15 +357,37 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         {/* Certifications Tab */}
         <TabsContent value="certifications" className="space-y-6">
           <Card>
-            <CardContent className="py-12 text-center">
-              <Award className="mx-auto h-12 w-12 text-muted-foreground" />
-              <p className="mt-4 text-muted-foreground">No certifications added yet</p>
-              {isOwnProfile && (
-                <Link href="/profile/edit?tab=certifications">
-                  <Button className="mt-4" variant="outline">
-                    Add Certification
-                  </Button>
-                </Link>
+            <CardContent className="py-6">
+              {(!certifications || certifications.length === 0) ? (
+                <div className="py-6 text-center">
+                  <Award className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <p className="mt-4 text-muted-foreground">No certifications added yet</p>
+                  {isOwnProfile && (
+                    <Link href="/profile/edit?tab=certifications">
+                      <Button className="mt-4" variant="outline">
+                        Add Certification
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {certifications.map((cert: any) => (
+                    <div key={cert.id} className="rounded-md border p-4">
+                      <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <p className="font-medium">{cert.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {[cert.issuer, cert.year].filter(Boolean).join(' • ')}
+                          </p>
+                        </div>
+                        {cert.credential && (
+                          <p className="mt-2 text-xs text-muted-foreground md:mt-0">Credential: {cert.credential}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
@@ -362,15 +396,37 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         {/* Achievements Tab */}
         <TabsContent value="achievements" className="space-y-6">
           <Card>
-            <CardContent className="py-12 text-center">
-              <Award className="mx-auto h-12 w-12 text-muted-foreground" />
-              <p className="mt-4 text-muted-foreground">No achievements added yet</p>
-              {isOwnProfile && (
-                <Link href="/profile/edit?tab=achievements">
-                  <Button className="mt-4" variant="outline">
-                    Add Achievement
-                  </Button>
-                </Link>
+            <CardContent className="py-6">
+              {(!achievements || achievements.length === 0) ? (
+                <div className="py-6 text-center">
+                  <Award className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <p className="mt-4 text-muted-foreground">No achievements added yet</p>
+                  {isOwnProfile && (
+                    <Link href="/profile/edit?tab=achievements">
+                      <Button className="mt-4" variant="outline">
+                        Add Achievement
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {achievements.map((a: any) => (
+                    <div key={a.id} className="rounded-md border p-4">
+                      <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <p className="font-medium">{a.title}</p>
+                          {a.year && (
+                            <p className="text-sm text-muted-foreground">{a.year}</p>
+                          )}
+                        </div>
+                      </div>
+                      {a.description && (
+                        <p className="mt-2 text-sm text-muted-foreground">{a.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>

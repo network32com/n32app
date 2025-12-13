@@ -24,6 +24,7 @@ export type Specialty =
   | 'periodontics'
   | 'prosthodontics'
   | 'oral_surgery'
+  | 'oral_medicine_radiology'
   | 'pediatric_dentistry'
   | 'cosmetic_dentistry';
 
@@ -38,9 +39,44 @@ export interface User {
   location?: string;
   bio?: string;
   profile_photo_url?: string;
+  linkedin_url?: string;
+  instagram_url?: string;
+  twitter_url?: string;
   onboarding_completed: boolean;
   terms_accepted: boolean;
   terms_accepted_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserEducation {
+  id: string;
+  user_id: string;
+  institution: string;
+  degree?: string;
+  field?: string;
+  year?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserCertification {
+  id: string;
+  user_id: string;
+  name: string;
+  issuer?: string;
+  year?: string;
+  credential?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserAchievement {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  year?: string;
   created_at: string;
   updated_at: string;
 }

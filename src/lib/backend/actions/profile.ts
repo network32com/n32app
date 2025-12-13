@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/shared/supabase/server';
 import { revalidatePath } from 'next/cache';
-import type { User } from '@/lib/shared/types/database.types';
+import type { User, UserCertification, UserAchievement } from '@/lib/shared/types/database.types';
 
 export async function getUserProfile(userId: string) {
   const supabase = await createClient();
@@ -130,6 +130,105 @@ export async function isFollowing(followerId: string, followingId: string): Prom
   }
 
   return !!data;
+}
+
+// ================================
+// Certifications & Achievements
+// ================================
+
+export async function getUserCertifications(userId: string): Promise<UserCertification[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('user_certifications')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data || []) as UserCertification[];
+}
+
+export async function getUserAchievements(userId: string): Promise<UserAchievement[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('user_achievements')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data || []) as UserAchievement[];
+}
+
+export async function replaceUserCertifications(
+  userId: string,
+  certs: Array<{ name: string; issuer?: string; year?: string; credential?: string }>
+) {
+  const supabase = await createClient();
+
+  // Delete existing
+  const { error: delError } = await supabase
+    .from('user_certifications')
+    .delete()
+    .eq('user_id', userId);
+
+  if (delError) throw new Error(delError.message);
+
+  const rows = certs
+    .map((c) => ({
+      user_id: userId,
+      name: (c.name || '').trim(),
+      issuer: c.issuer?.trim() || null,
+      year: c.year?.trim() || null,
+      credential: c.credential?.trim() || null,
+    }))
+    .filter((c) => c.name.length > 0);
+
+  if (rows.length > 0) {
+    const { error: insError } = await supabase.from('user_certifications').insert(rows);
+    if (insError) throw new Error(insError.message);
+  }
+
+  revalidatePath('/profile/[id]', 'page');
+}
+
+export async function replaceUserAchievements(
+  userId: string,
+  achs: Array<{ title: string; description?: string; year?: string }>
+) {
+  const supabase = await createClient();
+
+  // Delete existing
+  const { error: delError } = await supabase
+    .from('user_achievements')
+    .delete()
+    .eq('user_id', userId);
+
+  if (delError) throw new Error(delError.message);
+
+  const rows = achs
+    .map((a) => ({
+      user_id: userId,
+      title: (a.title || '').trim(),
+      description: a.description?.trim() || null,
+      year: a.year?.trim() || null,
+    }))
+    .filter((a) => a.title.length > 0);
+
+  if (rows.length > 0) {
+    const { error: insError } = await supabase.from('user_achievements').insert(rows);
+    if (insError) throw new Error(insError.message);
+  }
+
+  revalidatePath('/profile/[id]', 'page');
 }
 
 export async function followUser(followerId: string, followingId: string) {

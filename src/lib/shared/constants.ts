@@ -18,7 +18,8 @@ export const SPECIALTIES = [
   { value: 'endodontics', label: 'Endodontics' },
   { value: 'periodontics', label: 'Periodontics' },
   { value: 'prosthodontics', label: 'Prosthodontics' },
-  { value: 'oral_surgery', label: 'Oral Surgery' },
+  { value: 'oral_surgery', label: 'Oral & Maxillofacial Surgery' },
+  { value: 'oral_medicine_radiology', label: 'Oral Medicine & Radiology' },
   { value: 'pediatric_dentistry', label: 'Pediatric Dentistry' },
   { value: 'cosmetic_dentistry', label: 'Cosmetic Dentistry' },
 ] as const;
