@@ -67,6 +67,10 @@ function ProfileEditContent() {
   const [savingCertifications, setSavingCertifications] = useState(false);
   const [savingAchievements, setSavingAchievements] = useState(false);
 
+  // Track unsaved changes
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [initialProfile, setInitialProfile] = useState<Partial<User>>({});
+
   useEffect(() => {
     const loadProfile = async () => {
       const supabase = createClient();
@@ -87,8 +91,10 @@ function ProfileEditContent() {
 
       if (fetchError) {
         setError('Failed to load profile');
+        toast.error('Failed to load profile');
       } else if (userData) {
         setProfile(userData);
+        setInitialProfile(userData); // Store initial state for comparison
       }
 
       // Load educations, certifications and achievements
@@ -148,6 +154,25 @@ function ProfileEditContent() {
 
     loadProfile();
   }, [router]);
+
+  // Track changes to profile
+  useEffect(() => {
+    const hasChanges = JSON.stringify(profile) !== JSON.stringify(initialProfile) || photoFile !== null;
+    setHasUnsavedChanges(hasChanges);
+  }, [profile, photoFile, initialProfile]);
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -232,6 +257,8 @@ function ProfileEditContent() {
       if (updateError) throw updateError;
 
       setSuccess(true);
+      setHasUnsavedChanges(false); // Reset unsaved changes flag
+      toast.success('Profile updated successfully!');
       setTimeout(() => {
         router.push(`/profile/${user.id}`);
       }, 1500);

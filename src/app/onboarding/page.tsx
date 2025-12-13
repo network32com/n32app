@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Skeleton } from '@/components/ui/skeleton';
 import { USER_ROLES } from '@/lib/shared/constants';
 import type { UserRole } from '@/lib/shared/types/database.types';
 
@@ -95,8 +96,26 @@ export default function OnboardingPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p>Loading...</p>
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-2xl">
+          <CardHeader className="space-y-1">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-96" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <Skeleton className="h-4 w-32" />
+              <div className="grid gap-4 md:grid-cols-2">
+                <Skeleton className="h-32" />
+                <Skeleton className="h-32" />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-24" />
+            </div>
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -118,21 +137,19 @@ export default function OnboardingPage() {
               {USER_ROLES.map((role) => (
                 <Card
                   key={role.value}
-                  className={`cursor-pointer transition-all hover:border-primary ${
-                    selectedRole === role.value
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border'
-                  }`}
+                  className={`cursor-pointer transition-all hover:border-primary ${selectedRole === role.value
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border'
+                    }`}
                   onClick={() => setSelectedRole(role.value as UserRole)}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start space-x-3">
                       <div
-                        className={`mt-1 h-5 w-5 rounded-full border-2 ${
-                          selectedRole === role.value
-                            ? 'border-primary bg-primary'
-                            : 'border-muted-foreground'
-                        }`}
+                        className={`mt-1 h-5 w-5 rounded-full border-2 ${selectedRole === role.value
+                          ? 'border-primary bg-primary'
+                          : 'border-muted-foreground'
+                          }`}
                       >
                         {selectedRole === role.value && (
                           <div className="flex h-full items-center justify-center">

@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import Link from 'next/link';
-import { Eye, Bookmark, Plus, Search, Share2, Clock, MapPin } from 'lucide-react';
+import { Eye, Bookmark, Plus, Search, Share2, Clock, MapPin, X } from 'lucide-react';
 import Image from 'next/image';
 import { PROCEDURE_TYPES, SPECIALTIES } from '@/lib/shared/constants';
 import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
@@ -139,19 +139,20 @@ export default function CasesPage() {
         <div className="flex flex-col gap-4">
           {/* Search Bar */}
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
               type="text"
               placeholder="Search cases by title or notes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
+              aria-label="Search clinical cases"
             />
           </div>
 
           {/* Filters */}
           <div className="flex flex-wrap gap-2">
-            <Select value={procedureFilter} onValueChange={setProcedureFilter}>
+            <Select value={procedureFilter} onValueChange={setProcedureFilter} aria-label="Filter by procedure type">
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Procedure Type" />
               </SelectTrigger>
@@ -165,7 +166,7 @@ export default function CasesPage() {
               </SelectContent>
             </Select>
 
-            <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
+            <Select value={specialtyFilter} onValueChange={setSpecialtyFilter} aria-label="Filter by specialty">
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Specialty" />
               </SelectTrigger>
@@ -185,25 +186,73 @@ export default function CasesPage() {
               value={locationFilter}
               onChange={(e) => setLocationFilter(e.target.value)}
               className="w-[180px]"
+              aria-label="Filter by location"
             />
 
             {(procedureFilter !== 'all' ||
               specialtyFilter !== 'all' ||
               locationFilter ||
               searchQuery) && (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setProcedureFilter('all');
-                  setSpecialtyFilter('all');
-                  setLocationFilter('');
-                  setSearchQuery('');
-                }}
-              >
-                Clear Filters
-              </Button>
-            )}
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setProcedureFilter('all');
+                    setSpecialtyFilter('all');
+                    setLocationFilter('');
+                    setSearchQuery('');
+                  }}
+                  aria-label="Clear all filters"
+                >
+                  Clear Filters
+                </Button>
+              )}
           </div>
+
+          {/* Active Filter Pills */}
+          {(procedureFilter !== 'all' || specialtyFilter !== 'all' || locationFilter || searchQuery) && (
+            <div className="flex flex-wrap gap-2">
+              {searchQuery && (
+                <Badge variant="secondary" className="gap-1">
+                  Search: {searchQuery}
+                  <X
+                    className="h-3 w-3 cursor-pointer hover:text-destructive"
+                    onClick={() => setSearchQuery('')}
+                    aria-label="Clear search"
+                  />
+                </Badge>
+              )}
+              {procedureFilter !== 'all' && (
+                <Badge variant="secondary" className="gap-1">
+                  {PROCEDURE_TYPES.find(p => p.value === procedureFilter)?.label}
+                  <X
+                    className="h-3 w-3 cursor-pointer hover:text-destructive"
+                    onClick={() => setProcedureFilter('all')}
+                    aria-label="Clear procedure filter"
+                  />
+                </Badge>
+              )}
+              {specialtyFilter !== 'all' && (
+                <Badge variant="secondary" className="gap-1">
+                  {SPECIALTIES.find(s => s.value === specialtyFilter)?.label}
+                  <X
+                    className="h-3 w-3 cursor-pointer hover:text-destructive"
+                    onClick={() => setSpecialtyFilter('all')}
+                    aria-label="Clear specialty filter"
+                  />
+                </Badge>
+              )}
+              {locationFilter && (
+                <Badge variant="secondary" className="gap-1">
+                  Location: {locationFilter}
+                  <X
+                    className="h-3 w-3 cursor-pointer hover:text-destructive"
+                    onClick={() => setLocationFilter('')}
+                    aria-label="Clear location filter"
+                  />
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -362,10 +411,10 @@ export default function CasesPage() {
                       View Full Case
                     </Button>
                   </Link>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" aria-label="Save case">
                     <Bookmark className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" aria-label="Share case">
                     <Share2 className="h-4 w-4" />
                   </Button>
                 </div>
