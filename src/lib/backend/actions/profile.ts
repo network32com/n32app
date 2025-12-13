@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/shared/supabase/server';
 import { revalidatePath } from 'next/cache';
-import type { User, UserCertification, UserAchievement } from '@/lib/shared/types/database.types';
+import type { User, UserEducation, UserCertification, UserAchievement } from '@/lib/shared/types/database.types';
 
 export async function getUserProfile(userId: string) {
   const supabase = await createClient();
@@ -133,8 +133,24 @@ export async function isFollowing(followerId: string, followingId: string): Prom
 }
 
 // ================================
-// Certifications & Achievements
+// Education, Certifications & Achievements
 // ================================
+
+export async function getUserEducations(userId: string): Promise<UserEducation[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('user_educations')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data || []) as UserEducation[];
+}
 
 export async function getUserCertifications(userId: string): Promise<UserCertification[]> {
   const supabase = await createClient();
@@ -166,6 +182,38 @@ export async function getUserAchievements(userId: string): Promise<UserAchieveme
   }
 
   return (data || []) as UserAchievement[];
+}
+
+export async function replaceUserEducations(
+  userId: string,
+  educations: Array<{ institution: string; degree?: string; field?: string; year?: string }>
+) {
+  const supabase = await createClient();
+
+  // Delete existing
+  const { error: delError } = await supabase
+    .from('user_educations')
+    .delete()
+    .eq('user_id', userId);
+
+  if (delError) throw new Error(delError.message);
+
+  const rows = educations
+    .map((e) => ({
+      user_id: userId,
+      institution: (e.institution || '').trim(),
+      degree: e.degree?.trim() || null,
+      field: e.field?.trim() || null,
+      year: e.year?.trim() || null,
+    }))
+    .filter((e) => e.institution.length > 0);
+
+  if (rows.length > 0) {
+    const { error: insError } = await supabase.from('user_educations').insert(rows);
+    if (insError) throw new Error(insError.message);
+  }
+
+  revalidatePath('/profile/[id]', 'page');
 }
 
 export async function replaceUserCertifications(

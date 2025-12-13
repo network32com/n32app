@@ -27,7 +27,7 @@ function ProfileEditContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
-  
+
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -63,6 +63,7 @@ function ProfileEditContent() {
     { title: '', description: '', year: '' },
   ]);
 
+  const [savingEducation, setSavingEducation] = useState(false);
   const [savingCertifications, setSavingCertifications] = useState(false);
   const [savingAchievements, setSavingAchievements] = useState(false);
 
@@ -90,8 +91,24 @@ function ProfileEditContent() {
         setProfile(userData);
       }
 
-      // Load certifications and achievements
+      // Load educations, certifications and achievements
       try {
+        const { data: edus } = await supabase
+          .from('user_educations')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        if (edus && edus.length > 0) {
+          setEducation(
+            edus.map((e: any) => ({
+              institution: e.institution || '',
+              degree: e.degree || '',
+              field: e.field || '',
+              year: e.year || '',
+            }))
+          );
+        }
+
         const { data: certs } = await supabase
           .from('user_certifications')
           .select('*')
@@ -269,6 +286,44 @@ function ProfileEditContent() {
     const updated = [...achievements];
     updated[index] = { ...updated[index], [field]: value };
     setAchievements(updated);
+  };
+
+  const saveEducation = async () => {
+    try {
+      setSavingEducation(true);
+      setError(null);
+      const supabase = createClient();
+      const { data: auth } = await supabase.auth.getUser();
+      const user = auth.user;
+      if (!user) throw new Error('Not authenticated');
+
+      const { error: delError } = await supabase
+        .from('user_educations')
+        .delete()
+        .eq('user_id', user.id);
+      if (delError) throw delError;
+
+      const rows = education
+        .map((e) => ({
+          user_id: user.id,
+          institution: (e.institution || '').trim(),
+          degree: e.degree?.trim() || null,
+          field: e.field?.trim() || null,
+          year: e.year?.trim() || null,
+        }))
+        .filter((e) => e.institution.length > 0);
+
+      if (rows.length > 0) {
+        const { error: insError } = await supabase.from('user_educations').insert(rows);
+        if (insError) throw insError;
+      }
+      toast.success('Education saved');
+    } catch (err: any) {
+      setError(err.message || 'Failed to save education');
+      toast.error(err.message || 'Failed to save education');
+    } finally {
+      setSavingEducation(false);
+    }
   };
 
   const saveCertifications = async () => {
@@ -643,8 +698,8 @@ function ProfileEditContent() {
               </Button>
 
               <div className="flex gap-2 pt-4">
-                <Button onClick={() => console.log('Save education:', education)}>
-                  Save Education
+                <Button onClick={saveEducation} disabled={savingEducation}>
+                  {savingEducation ? 'Saving...' : 'Save Education'}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => router.back()}>
                   Cancel

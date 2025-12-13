@@ -13,6 +13,7 @@ import {
   getFollowingCount,
   getCaseCount,
   isFollowing,
+  getUserEducations,
   getUserCertifications,
   getUserAchievements,
 } from '@/lib/backend/actions/profile';
@@ -57,6 +58,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     followingCount,
     caseCount,
     isUserFollowing,
+    educations,
     certifications,
     achievements,
   ] = await Promise.all([
@@ -64,6 +66,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     getFollowingCount(id),
     getCaseCount(id),
     currentUser ? isFollowing(currentUser.id, id) : Promise.resolve(false),
+    getUserEducations(id),
     getUserCertifications(id),
     getUserAchievements(id),
   ]);
@@ -195,6 +198,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="w-full justify-start">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="education">Education</TabsTrigger>
           <TabsTrigger value="cases">Clinical Cases</TabsTrigger>
           <TabsTrigger value="certifications">Certifications</TabsTrigger>
           <TabsTrigger value="achievements">Achievements</TabsTrigger>
@@ -299,6 +303,40 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Education Tab */}
+        <TabsContent value="education" className="space-y-6">
+          <Card>
+            <CardContent className="py-6">
+              {(!educations || educations.length === 0) ? (
+                <div className="py-6 text-center">
+                  <GraduationCap className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <p className="mt-4 text-muted-foreground">No education added yet</p>
+                  {isOwnProfile && (
+                    <Link href="/profile/edit?tab=education">
+                      <Button className="mt-4" variant="outline">
+                        Add Education
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {educations.map((edu: any) => (
+                    <div key={edu.id} className="rounded-md border p-4">
+                      <div className="flex flex-col gap-1">
+                        <p className="font-medium">{edu.institution}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {[edu.degree, edu.field, edu.year].filter(Boolean).join(' • ')}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Clinical Cases Tab */}
