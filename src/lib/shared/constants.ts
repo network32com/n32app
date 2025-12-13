@@ -20,8 +20,10 @@ export const SPECIALTIES = [
   { value: 'prosthodontics', label: 'Prosthodontics' },
   { value: 'oral_surgery', label: 'Oral & Maxillofacial Surgery' },
   { value: 'oral_medicine_radiology', label: 'Oral Medicine & Radiology' },
+  { value: 'oral_pathology', label: 'Oral Pathology' },
   { value: 'pediatric_dentistry', label: 'Pediatric Dentistry' },
   { value: 'cosmetic_dentistry', label: 'Cosmetic Dentistry' },
+  { value: 'public_health', label: 'Public Health' },
 ] as const;
 
 export const USER_ROLES = [
