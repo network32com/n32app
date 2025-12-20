@@ -42,6 +42,7 @@ export interface User {
   linkedin_url?: string;
   instagram_url?: string;
   twitter_url?: string;
+  facebook_url?: string;
   onboarding_completed: boolean;
   terms_accepted: boolean;
   terms_accepted_at?: string;

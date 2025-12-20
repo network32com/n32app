@@ -27,6 +27,7 @@ import {
   Linkedin,
   Instagram,
   Twitter,
+  Facebook,
   Share2,
   Eye,
   FileText,
@@ -313,7 +314,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {(profile.linkedin_url || profile.twitter_url || profile.instagram_url) ? (
+                {(profile.linkedin_url || profile.twitter_url || profile.instagram_url || profile.facebook_url) ? (
                   <div className="flex flex-wrap gap-3">
                     {profile.linkedin_url && (
                       <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer">
@@ -336,6 +337,14 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                         <Button variant="outline" size="sm">
                           <Instagram className="mr-2 h-4 w-4 text-[#E4405F]" />
                           Instagram
+                        </Button>
+                      </a>
+                    )}
+                    {profile.facebook_url && (
+                      <a href={profile.facebook_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm">
+                          <Facebook className="mr-2 h-4 w-4 text-[#1877F2]" />
+                          Facebook
                         </Button>
                       </a>
                     )}

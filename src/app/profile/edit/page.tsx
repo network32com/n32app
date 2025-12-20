@@ -19,7 +19,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SPECIALTIES } from '@/lib/shared/constants';
 import type { User, Specialty } from '@/lib/shared/types/database.types';
-import { Upload, X, User as UserIcon, GraduationCap, Award, Plus, Trash2, Linkedin, Instagram, Twitter } from 'lucide-react';
+import { Upload, X, User as UserIcon, GraduationCap, Award, Plus, Trash2, Linkedin, Instagram, Twitter, Facebook } from 'lucide-react';
 import { toast } from 'sonner';
 import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
 
@@ -46,6 +46,7 @@ function ProfileEditContent() {
     linkedin_url: '',
     instagram_url: '',
     twitter_url: '',
+    facebook_url: '',
   });
 
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -256,6 +257,7 @@ function ProfileEditContent() {
           linkedin_url: profile.linkedin_url,
           instagram_url: profile.instagram_url,
           twitter_url: profile.twitter_url,
+          facebook_url: profile.facebook_url,
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id);
@@ -659,6 +661,17 @@ function ProfileEditContent() {
                         placeholder="https://instagram.com/yourhandle"
                         value={profile.instagram_url || ''}
                         onChange={(e) => setProfile({ ...profile, instagram_url: e.target.value })}
+                        disabled={submitting}
+                        className="flex-1"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Facebook className="h-5 w-5 text-[#1877F2]" />
+                      <Input
+                        placeholder="https://facebook.com/yourprofile"
+                        value={profile.facebook_url || ''}
+                        onChange={(e) => setProfile({ ...profile, facebook_url: e.target.value })}
                         disabled={submitting}
                         className="flex-1"
                       />
