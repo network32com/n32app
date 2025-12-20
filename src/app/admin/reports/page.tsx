@@ -22,9 +22,22 @@ export default async function AdminReportsPage() {
     redirect('/auth/login');
   }
 
-  // Check if user is admin (you can add an is_admin field to users table)
-  // For now, we'll just check if they're authenticated
-  // In production, add proper admin role checking
+  // Check if user is admin - SECURITY CRITICAL
+  const { data: userData, error: userError } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (userError || !userData) {
+    console.error('Error fetching user role:', userError);
+    redirect('/dashboard');
+  }
+
+  if (userData.role !== 'admin') {
+    console.warn(`Unauthorized admin access attempt by user: ${user.id}`);
+    redirect('/dashboard');
+  }
 
   const [allReports, stats] = await Promise.all([getAllReports(), getReportStats()]);
 

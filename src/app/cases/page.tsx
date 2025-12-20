@@ -21,6 +21,7 @@ import Image from 'next/image';
 import { PROCEDURE_TYPES, SPECIALTIES } from '@/lib/shared/constants';
 import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
 import { formatDistanceToNow } from 'date-fns';
+import { toast } from 'sonner';
 
 export default function CasesPage() {
   const router = useRouter();
@@ -114,6 +115,71 @@ export default function CasesPage() {
   const truncateText = (text: string, maxLength: number) => {
     if (!text) return '';
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
+  const handleSaveCase = async (caseId: string) => {
+    const supabase = createClient();
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error('Please log in to save cases');
+        return;
+      }
+
+      // Check if already saved
+      const { data: existing } = await supabase
+        .from('saved_cases')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('case_id', caseId)
+        .single();
+
+      if (existing) {
+        // Already saved, unsave it
+        await supabase
+          .from('saved_cases')
+          .delete()
+          .eq('id', existing.id);
+        toast.success('Case removed from saved');
+      } else {
+        // Save the case
+        await supabase
+          .from('saved_cases')
+          .insert({
+            user_id: user.id,
+            case_id: caseId,
+          });
+        toast.success('Case saved to your collection!');
+      }
+    } catch (error) {
+      console.error('Error saving case:', error);
+      toast.error('Failed to save case');
+    }
+  };
+
+  const handleShareCase = async (caseId: string, title: string) => {
+    const url = `${window.location.origin}/cases/${caseId}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Clinical Case: ${title}`,
+          text: 'Check out this clinical case on Network32',
+          url: url,
+        });
+      } catch (err) {
+        // User cancelled or share failed, fallback to clipboard
+        await navigator.clipboard.writeText(url);
+        toast.success('Link copied to clipboard!');
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast.success('Link copied to clipboard!');
+    }
   };
 
   return (
@@ -411,10 +477,20 @@ export default function CasesPage() {
                       View Full Case
                     </Button>
                   </Link>
-                  <Button variant="outline" size="sm" aria-label="Save case">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    aria-label="Save case"
+                    onClick={() => handleSaveCase(caseItem.id)}
+                  >
                     <Bookmark className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" aria-label="Share case">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    aria-label="Share case"
+                    onClick={() => handleShareCase(caseItem.id, caseItem.title)}
+                  >
                     <Share2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -423,16 +499,6 @@ export default function CasesPage() {
           ))}
         </div>
       )}
-
-      {/* Floating Share Case Button */}
-      <Link href="/cases/create">
-        <Button
-          size="lg"
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg transition-transform hover:scale-110"
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
-      </Link>
     </ClientDashboardLayout>
   );
 }

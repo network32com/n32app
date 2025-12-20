@@ -98,6 +98,13 @@ export interface Clinic {
   updated_at: string;
 }
 
+export interface SavedCase {
+  id: string;
+  user_id: string;
+  case_id: string;
+  created_at: string;
+}
+
 export interface ClinicalCase {
   id: string;
   user_id: string;
@@ -107,6 +114,8 @@ export interface ClinicalCase {
   tags: string[];
   before_image_url: string;
   after_image_url: string;
+  accessory_photos?: string[];
+  location?: string;
   patient_consent_given: boolean;
   consent_timestamp: string;
   views_count: number;

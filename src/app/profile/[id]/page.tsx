@@ -25,6 +25,8 @@ import {
   Mail,
   Globe,
   Linkedin,
+  Instagram,
+  Twitter,
   Share2,
   Eye,
   FileText,
@@ -167,20 +169,44 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   </div>
                   <p className="mt-1 text-2xl font-bold">{caseCount}</p>
                 </div>
-                <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950">
-                  <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                    <Users className="h-4 w-4" />
-                    <p className="text-xs font-medium">Followers</p>
+                {isOwnProfile ? (
+                  <Link href="/profile/followers" className="block">
+                    <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer">
+                      <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                        <Users className="h-4 w-4" />
+                        <p className="text-xs font-medium">Followers</p>
+                      </div>
+                      <p className="mt-1 text-2xl font-bold">{followerCount}</p>
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950">
+                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                      <Users className="h-4 w-4" />
+                      <p className="text-xs font-medium">Followers</p>
+                    </div>
+                    <p className="mt-1 text-2xl font-bold">{followerCount}</p>
                   </div>
-                  <p className="mt-1 text-2xl font-bold">{followerCount}</p>
-                </div>
-                <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950">
-                  <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                    <Users className="h-4 w-4" />
-                    <p className="text-xs font-medium">Following</p>
+                )}
+                {isOwnProfile ? (
+                  <Link href="/profile/following" className="block">
+                    <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer">
+                      <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                        <Users className="h-4 w-4" />
+                        <p className="text-xs font-medium">Following</p>
+                      </div>
+                      <p className="mt-1 text-2xl font-bold">{followingCount}</p>
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950">
+                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                      <Users className="h-4 w-4" />
+                      <p className="text-xs font-medium">Following</p>
+                    </div>
+                    <p className="mt-1 text-2xl font-bold">{followingCount}</p>
                   </div>
-                  <p className="mt-1 text-2xl font-bold">{followingCount}</p>
-                </div>
+                )}
                 <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950">
                   <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
                     <Eye className="h-4 w-4" />
@@ -287,19 +313,38 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" disabled>
-                    <Linkedin className="mr-2 h-4 w-4" />
-                    LinkedIn
-                  </Button>
-                  <Button variant="outline" size="sm" disabled>
-                    <Globe className="mr-2 h-4 w-4" />
-                    Website
-                  </Button>
-                  <p className="w-full text-sm text-muted-foreground">
+                {(profile.linkedin_url || profile.twitter_url || profile.instagram_url) ? (
+                  <div className="flex flex-wrap gap-3">
+                    {profile.linkedin_url && (
+                      <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm">
+                          <Linkedin className="mr-2 h-4 w-4 text-[#0077B5]" />
+                          LinkedIn
+                        </Button>
+                      </a>
+                    )}
+                    {profile.twitter_url && (
+                      <a href={profile.twitter_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm">
+                          <Twitter className="mr-2 h-4 w-4 text-[#1DA1F2]" />
+                          Twitter
+                        </Button>
+                      </a>
+                    )}
+                    {profile.instagram_url && (
+                      <a href={profile.instagram_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm">
+                          <Instagram className="mr-2 h-4 w-4 text-[#E4405F]" />
+                          Instagram
+                        </Button>
+                      </a>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
                     {isOwnProfile ? 'Add social links in Edit Profile' : 'No social links available'}
                   </p>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>

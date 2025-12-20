@@ -19,7 +19,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SPECIALTIES } from '@/lib/shared/constants';
 import type { User, Specialty } from '@/lib/shared/types/database.types';
-import { Upload, X, User as UserIcon, GraduationCap, Award, Plus, Trash2 } from 'lucide-react';
+import { Upload, X, User as UserIcon, GraduationCap, Award, Plus, Trash2, Linkedin, Instagram, Twitter } from 'lucide-react';
 import { toast } from 'sonner';
 import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
 
@@ -43,6 +43,9 @@ function ProfileEditContent() {
     location: '',
     bio: '',
     profile_photo_url: '',
+    linkedin_url: '',
+    instagram_url: '',
+    twitter_url: '',
   });
 
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -250,6 +253,9 @@ function ProfileEditContent() {
           location: profile.location,
           bio: profile.bio,
           profile_photo_url: photoUrl,
+          linkedin_url: profile.linkedin_url,
+          instagram_url: profile.instagram_url,
+          twitter_url: profile.twitter_url,
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id);
@@ -615,6 +621,49 @@ function ProfileEditContent() {
                     rows={4}
                     placeholder="Tell us about yourself and your practice..."
                   />
+                </div>
+
+                {/* Social Links */}
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">Social Links</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Connect with colleagues by sharing your professional profiles
+                  </p>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Linkedin className="h-5 w-5 text-[#0077B5]" />
+                      <Input
+                        placeholder="https://linkedin.com/in/yourprofile"
+                        value={profile.linkedin_url || ''}
+                        onChange={(e) => setProfile({ ...profile, linkedin_url: e.target.value })}
+                        disabled={submitting}
+                        className="flex-1"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Twitter className="h-5 w-5 text-[#1DA1F2]" />
+                      <Input
+                        placeholder="https://twitter.com/yourhandle"
+                        value={profile.twitter_url || ''}
+                        onChange={(e) => setProfile({ ...profile, twitter_url: e.target.value })}
+                        disabled={submitting}
+                        className="flex-1"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Instagram className="h-5 w-5 text-[#E4405F]" />
+                      <Input
+                        placeholder="https://instagram.com/yourhandle"
+                        value={profile.instagram_url || ''}
+                        onChange={(e) => setProfile({ ...profile, instagram_url: e.target.value })}
+                        disabled={submitting}
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Error Message */}

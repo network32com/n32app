@@ -170,12 +170,6 @@ export default async function DashboardPage() {
             <CardDescription>Connect with other professionals</CardDescription>
           </CardHeader>
           <CardContent className="flex-1 space-y-4">
-            <div className="text-sm">
-              <span className="font-medium">{followerCount}</span>{' '}
-              <span className="text-muted-foreground">
-                {followerCount === 1 ? 'follower' : 'followers'}
-              </span>
-            </div>
             <div className="space-y-2">
               <Link href="/discover" className="block">
                 <Button className="w-full" variant="outline">
