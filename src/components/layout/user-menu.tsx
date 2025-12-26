@@ -22,8 +22,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { User, Moon, Sun, Lock, Trash2, LogOut } from 'lucide-react';
+import { User, Moon, Sun, Lock, Trash2, LogOut, Loader2 } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { toast } from 'sonner';
+import { deleteAccount } from '@/lib/backend/actions/account';
 
 interface UserMenuProps {
   user: {
@@ -37,12 +39,16 @@ interface UserMenuProps {
 export function UserMenu({ user }: UserMenuProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { theme, setTheme } = useTheme();
   const router = useRouter();
 
   const getInitials = (name: string) => {
-    return name
-      .split(' ')
+    // Filter out title prefixes (Dr., Mr., Ms., Mrs.)
+    const titles = ['Dr.', 'Mr.', 'Ms.', 'Mrs.'];
+    const parts = name.split(' ').filter(part => !titles.includes(part));
+
+    return parts
       .map((n) => n[0])
       .join('')
       .toUpperCase()
@@ -58,22 +64,24 @@ export function UserMenu({ user }: UserMenuProps) {
   };
 
   const handleDeleteAccount = async () => {
-    // First confirmation
-    if (!showDeleteDialog) {
-      setShowDeleteDialog(true);
-      return;
-    }
+    setDeleting(true);
 
-    // Second confirmation
-    if (!showConfirmDialog) {
-      setShowDeleteDialog(false);
-      setShowConfirmDialog(true);
-      return;
-    }
+    try {
+      const result = await deleteAccount();
 
-    // TODO: Implement account deletion
-    console.log('Delete account');
-    setShowConfirmDialog(false);
+      if (result.success) {
+        toast.success('Account deleted successfully');
+        setShowConfirmDialog(false);
+        // Redirect to home page
+        router.push('/');
+      } else {
+        toast.error(result.error || 'Failed to delete account');
+        setDeleting(false);
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete account');
+      setDeleting(false);
+    }
   };
 
   const toggleTheme = () => {
@@ -84,8 +92,8 @@ export function UserMenu({ user }: UserMenuProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-10 w-10 rounded-lg p-0">
-            <Avatar className="h-10 w-10 rounded-lg">
+          <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
+            <Avatar className="h-10 w-10 rounded-full">
               <AvatarImage src={user.profile_photo_url || undefined} alt={user.full_name} />
               <AvatarFallback className="bg-primary text-primary-foreground">
                 {getInitials(user.full_name)}
@@ -145,14 +153,14 @@ export function UserMenu({ user }: UserMenuProps) {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete your account and remove
-              all your data from our servers, including:
-              <ul className="mt-2 list-inside list-disc space-y-1">
-                <li>Your profile and personal information</li>
-                <li>All clinical cases you&apos;ve shared</li>
-                <li>Your saved cases and bookmarks</li>
-                <li>Your connections and followers</li>
-              </ul>
+              all your data from our servers.
             </AlertDialogDescription>
+            <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-muted-foreground">
+              <li>Your profile and personal information</li>
+              <li>All clinical cases you&apos;ve shared</li>
+              <li>Your saved cases and bookmarks</li>
+              <li>Your connections and followers</li>
+            </ul>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -171,7 +179,7 @@ export function UserMenu({ user }: UserMenuProps) {
       </AlertDialog>
 
       {/* Second Delete Confirmation */}
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      <AlertDialog open={showConfirmDialog} onOpenChange={(open) => !deleting && setShowConfirmDialog(open)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Final Confirmation</AlertDialogTitle>
@@ -181,12 +189,20 @@ export function UserMenu({ user }: UserMenuProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>No, Keep My Account</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>No, Keep My Account</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteAccount}
+              disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Yes, Delete Permanently
+              {deleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Yes, Delete Permanently'
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

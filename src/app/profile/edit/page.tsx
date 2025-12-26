@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/shared/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { SPECIALTIES } from '@/lib/shared/constants';
+import { SPECIALTIES, NAME_TITLES } from '@/lib/shared/constants';
 import type { User, Specialty } from '@/lib/shared/types/database.types';
 import { Upload, X, User as UserIcon, GraduationCap, Award, Plus, Trash2, Linkedin, Instagram, Twitter, Facebook } from 'lucide-react';
 import { toast } from 'sonner';
@@ -43,6 +44,7 @@ function ProfileEditContent() {
     location: '',
     bio: '',
     profile_photo_url: '',
+    contact_number: '',
     linkedin_url: '',
     instagram_url: '',
     twitter_url: '',
@@ -51,6 +53,11 @@ function ProfileEditContent() {
 
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
+  // Separate name fields
+  const [title, setTitle] = useState<string>('Dr.');
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
 
   // Education state
   const [education, setEducation] = useState([
@@ -99,6 +106,33 @@ function ProfileEditContent() {
       } else if (userData) {
         setProfile(userData);
         setInitialProfile(userData); // Store initial state for comparison
+
+        // Parse full_name into title, firstName, lastName
+        if (userData.full_name) {
+          const nameParts = userData.full_name.split(' ');
+          const possibleTitle = nameParts[0];
+
+          if (NAME_TITLES.some(t => t.value === possibleTitle)) {
+            setTitle(possibleTitle);
+            if (nameParts.length >= 3) {
+              setFirstName(nameParts.slice(1, -1).join(' '));
+              setLastName(nameParts[nameParts.length - 1]);
+            } else if (nameParts.length === 2) {
+              setFirstName(nameParts[1]);
+              setLastName('');
+            }
+          } else {
+            // No title prefix - default to Dr.
+            setTitle('Dr.');
+            if (nameParts.length >= 2) {
+              setFirstName(nameParts.slice(0, -1).join(' '));
+              setLastName(nameParts[nameParts.length - 1]);
+            } else {
+              setFirstName(nameParts[0]);
+              setLastName('');
+            }
+          }
+        }
       }
 
       // Load educations, certifications and achievements
@@ -244,16 +278,20 @@ function ProfileEditContent() {
         setUploadingPhoto(false);
       }
 
+      // Compute full_name from title + first + last
+      const computedFullName = `${title} ${firstName.trim()} ${lastName.trim()}`.trim();
+
       const { error: updateError } = await supabase
         .from('users')
         .update({
-          full_name: profile.full_name,
+          full_name: computedFullName,
           headline: profile.headline,
           degree: profile.degree,
           specialty: profile.specialty,
           location: profile.location,
           bio: profile.bio,
           profile_photo_url: photoUrl,
+          contact_number: profile.contact_number || null,
           linkedin_url: profile.linkedin_url,
           instagram_url: profile.instagram_url,
           twitter_url: profile.twitter_url,
@@ -537,19 +575,56 @@ function ProfileEditContent() {
                   </div>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                  {/* Full Name */}
-                  <div className="space-y-2">
-                    <Label htmlFor="full_name">Full Name *</Label>
-                    <Input
-                      id="full_name"
-                      value={profile.full_name || ''}
-                      onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
-                      required
-                      disabled={submitting}
-                    />
-                  </div>
+                {/* Name Fields */}
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">Your Name</Label>
+                  <div className="grid gap-4 md:grid-cols-4">
+                    {/* Title Dropdown */}
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Title</Label>
+                      <Select value={title} onValueChange={setTitle} disabled={submitting}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Title" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {NAME_TITLES.map((t) => (
+                            <SelectItem key={t.value} value={t.value}>
+                              {t.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
+                    {/* First Name */}
+                    <div className="space-y-2 md:col-span-1">
+                      <Label htmlFor="firstName">First Name *</Label>
+                      <Input
+                        id="firstName"
+                        placeholder="John"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                        disabled={submitting}
+                      />
+                    </div>
+
+                    {/* Last Name */}
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="lastName">Last Name *</Label>
+                      <Input
+                        id="lastName"
+                        placeholder="Smith"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                        disabled={submitting}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-2">
                   {/* Degree */}
                   <div className="space-y-2">
                     <Label htmlFor="degree">Degree</Label>
@@ -561,18 +636,18 @@ function ProfileEditContent() {
                       placeholder="e.g., DDS, DMD, BDS"
                     />
                   </div>
-                </div>
 
-                {/* Headline */}
-                <div className="space-y-2">
-                  <Label htmlFor="headline">Professional Headline</Label>
-                  <Input
-                    id="headline"
-                    value={profile.headline || ''}
-                    onChange={(e) => setProfile({ ...profile, headline: e.target.value })}
-                    disabled={submitting}
-                    placeholder="e.g., Cosmetic Dentist specializing in smile makeovers"
-                  />
+                  {/* Headline */}
+                  <div className="space-y-2">
+                    <Label htmlFor="headline">Professional Headline</Label>
+                    <Input
+                      id="headline"
+                      value={profile.headline || ''}
+                      onChange={(e) => setProfile({ ...profile, headline: e.target.value })}
+                      disabled={submitting}
+                      placeholder="e.g., Cosmetic Dentist"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
@@ -610,6 +685,21 @@ function ProfileEditContent() {
                       placeholder="e.g., New York, NY"
                     />
                   </div>
+                </div>
+
+                {/* Contact Number */}
+                <div className="space-y-2">
+                  <Label htmlFor="contact_number">Contact Number</Label>
+                  <PhoneInput
+                    id="contact_number"
+                    value={profile.contact_number || ''}
+                    onChange={(value) => setProfile({ ...profile, contact_number: value })}
+                    disabled={submitting}
+                    placeholder="Phone number"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    This will be visible on your profile to help colleagues reach you.
+                  </p>
                 </div>
 
                 {/* Bio */}

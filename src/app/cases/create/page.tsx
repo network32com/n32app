@@ -19,6 +19,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { PROCEDURE_TYPES } from '@/lib/shared/constants';
 import { createCase, uploadCaseImage } from '@/lib/backend/actions/case';
+import { compressImage } from '@/lib/utils/image-compression';
 import { Upload, X, FileText, Image as ImageIcon, Tag, Shield, MapPin, Plus } from 'lucide-react';
 import Image from 'next/image';
 import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
@@ -130,10 +131,25 @@ export default function CreateCasePage() {
 
             if (!user) throw new Error('Not authenticated');
 
-            // Upload images
+            // Get user's full name for watermark
+            const { data: userData } = await supabase
+                .from('users')
+                .select('full_name')
+                .eq('id', user.id)
+                .single();
+
+            const userName = userData?.full_name || 'Network32 User';
+
+            // Compress images before upload
+            const [compressedBefore, compressedAfter] = await Promise.all([
+                compressImage(beforeImage),
+                compressImage(afterImage),
+            ]);
+
+            // Upload compressed images with watermark
             const [beforeUrl, afterUrl] = await Promise.all([
-                uploadCaseImage(user.id, beforeImage, 'before'),
-                uploadCaseImage(user.id, afterImage, 'after'),
+                uploadCaseImage(user.id, compressedBefore, 'before', userName),
+                uploadCaseImage(user.id, compressedAfter, 'after', userName),
             ]);
 
             // Combine all notes into case_notes field
@@ -152,12 +168,15 @@ export default function CreateCasePage() {
                 combinedNotes += `\n\n**Outcome:** ${formData.outcome}`;
             }
 
-            // Upload accessory images if any
+            // Upload accessory images if any (also compressed)
             let accessoryUrls: string[] = [];
             if (accessoryImages.length > 0) {
+                const compressedAccessory = await Promise.all(
+                    accessoryImages.map(img => compressImage(img))
+                );
                 accessoryUrls = await Promise.all(
-                    accessoryImages.map((img, idx) =>
-                        uploadCaseImage(user.id, img, `accessory-${idx}`)
+                    compressedAccessory.map((img, idx) =>
+                        uploadCaseImage(user.id, img, `accessory-${idx}`, userName)
                     )
                 );
             }

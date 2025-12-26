@@ -6,9 +6,18 @@ import { createClient } from '@/lib/shared/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
-import { USER_ROLES } from '@/lib/shared/constants';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { USER_ROLES, NAME_TITLES } from '@/lib/shared/constants';
 import type { UserRole } from '@/lib/shared/types/database.types';
 
 export default function OnboardingPage() {
@@ -20,7 +29,12 @@ export default function OnboardingPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [fullName, setFullName] = useState<string>('');
+
+  // Separate name fields
+  const [title, setTitle] = useState<string>('Dr.');
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
+  const [contactNumber, setContactNumber] = useState<string>('');
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -36,7 +50,41 @@ export default function OnboardingPage() {
 
       setUserId(user.id);
       setUserEmail(user.email || '');
-      setFullName(user.user_metadata?.full_name || '');
+
+      // Auto-populate name from Google OAuth or user metadata
+      const metadata = user.user_metadata;
+      if (metadata) {
+        // Google OAuth provides given_name and family_name
+        if (metadata.given_name) {
+          setFirstName(metadata.given_name);
+        }
+        if (metadata.family_name) {
+          setLastName(metadata.family_name);
+        }
+        // Fallback: parse full_name if available
+        if (!metadata.given_name && metadata.full_name) {
+          const nameParts = metadata.full_name.split(' ');
+          // Check if first part is a title
+          const possibleTitle = nameParts[0];
+          if (NAME_TITLES.some(t => t.value === possibleTitle)) {
+            setTitle(possibleTitle);
+            if (nameParts.length >= 3) {
+              setFirstName(nameParts.slice(1, -1).join(' '));
+              setLastName(nameParts[nameParts.length - 1]);
+            } else if (nameParts.length === 2) {
+              setFirstName(nameParts[1]);
+            }
+          } else {
+            // No title prefix
+            if (nameParts.length >= 2) {
+              setFirstName(nameParts.slice(0, -1).join(' '));
+              setLastName(nameParts[nameParts.length - 1]);
+            } else {
+              setFirstName(nameParts[0]);
+            }
+          }
+        }
+      }
 
       // Check if user already has a profile
       const { data: existingUser } = await supabase
@@ -62,11 +110,24 @@ export default function OnboardingPage() {
       return;
     }
 
+    if (!firstName.trim()) {
+      setError('Please enter your first name');
+      return;
+    }
+
+    if (!lastName.trim()) {
+      setError('Please enter your last name');
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 
     try {
       const supabase = createClient();
+
+      // Compute full_name from title + first + last
+      const fullName = `${title} ${firstName.trim()} ${lastName.trim()}`;
 
       // Create or update user profile
       const { error: upsertError } = await supabase.from('users').upsert(
@@ -74,6 +135,7 @@ export default function OnboardingPage() {
           id: userId!,
           email: userEmail!,
           full_name: fullName,
+          contact_number: contactNumber || null,
           role: selectedRole,
           terms_accepted: true,
           terms_accepted_at: new Date().toISOString(),
@@ -133,7 +195,7 @@ export default function OnboardingPage() {
           {/* Role Selection */}
           <div className="space-y-4">
             <Label className="text-base font-semibold">Select Your Role</Label>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-3">
               {USER_ROLES.map((role) => (
                 <Card
                   key={role.value}
@@ -160,9 +222,11 @@ export default function OnboardingPage() {
                       <div className="flex-1">
                         <h3 className="font-semibold">{role.label}</h3>
                         <p className="mt-1 text-sm text-muted-foreground">
-                          {role.value === 'dentist'
-                            ? 'Share clinical cases, connect with peers, and grow your professional network'
-                            : 'Manage your clinic profile, invite team members, and showcase your practice'}
+                          {role.value === 'student'
+                            ? 'Learn from cases, connect with mentors, and build your dental network'
+                            : role.value === 'professional'
+                              ? 'Share clinical cases, connect with peers, and grow your professional network'
+                              : 'Manage your clinic profile, invite team members, and showcase your practice'}
                         </p>
                       </div>
                     </div>
@@ -170,6 +234,67 @@ export default function OnboardingPage() {
                 </Card>
               ))}
             </div>
+          </div>
+
+          {/* Name Fields */}
+          <div className="space-y-4">
+            <Label className="text-base font-semibold">Your Name</Label>
+            <div className="grid gap-4 md:grid-cols-6">
+              {/* Title Dropdown */}
+              <div className="space-y-2 md:col-span-1">
+                <Label htmlFor="title">Title</Label>
+                <Select value={title} onValueChange={setTitle}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Title" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {NAME_TITLES.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* First Name */}
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="firstName">First Name *</Label>
+                <Input
+                  id="firstName"
+                  placeholder="John"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+              </div>
+
+              {/* Last Name */}
+              <div className="space-y-2 md:col-span-3">
+                <Label htmlFor="lastName">Last Name *</Label>
+                <Input
+                  id="lastName"
+                  placeholder="Smith"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Number (Optional) */}
+          <div className="space-y-2">
+            <Label htmlFor="contactNumber">Contact Number (Optional)</Label>
+            <PhoneInput
+              id="contactNumber"
+              placeholder="Phone number"
+              value={contactNumber}
+              onChange={setContactNumber}
+            />
+            <p className="text-xs text-muted-foreground">
+              This will be visible on your profile to help colleagues reach you.
+            </p>
           </div>
 
           {/* Terms and Conditions */}
@@ -219,3 +344,4 @@ export default function OnboardingPage() {
     </div>
   );
 }
+

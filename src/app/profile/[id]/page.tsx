@@ -19,6 +19,7 @@ import {
 } from '@/lib/backend/actions/profile';
 import { SPECIALTIES } from '@/lib/shared/constants';
 import { FollowButton } from '@/components/profile/follow-button';
+import { ShareProfileButton } from '@/components/profile/share-profile-button';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import {
   MapPin,
@@ -28,7 +29,6 @@ import {
   Instagram,
   Twitter,
   Facebook,
-  Share2,
   Eye,
   FileText,
   Users,
@@ -36,9 +36,55 @@ import {
   GraduationCap,
   Briefcase,
 } from 'lucide-react';
+import type { Metadata } from 'next';
 
 interface ProfilePageProps {
   params: Promise<{ id: string }>;
+}
+
+// Generate SEO metadata for profile sharing
+export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
+  const { id } = await params;
+
+  try {
+    const profile = await getUserProfile(id);
+    const specialtyLabel = SPECIALTIES.find(s => s.value === profile.specialty)?.label;
+
+    const title = `${profile.full_name} | Network32`;
+    const description = profile.headline
+      ? `${profile.headline} - ${specialtyLabel || profile.role} on Network32`
+      : `${specialtyLabel || profile.role.replace(/_/g, ' ')} on Network32 - The Professional Network for Dentists`;
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: 'profile',
+        siteName: 'Network32',
+        images: profile.profile_photo_url ? [
+          {
+            url: profile.profile_photo_url,
+            width: 400,
+            height: 400,
+            alt: profile.full_name,
+          },
+        ] : [],
+      },
+      twitter: {
+        card: 'summary',
+        title,
+        description,
+        images: profile.profile_photo_url ? [profile.profile_photo_url] : [],
+      },
+    };
+  } catch {
+    return {
+      title: 'Profile | Network32',
+      description: 'View professional profiles on Network32 - The Professional Network for Dentists',
+    };
+  }
 }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
@@ -138,9 +184,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                       <Link href="/profile/edit">
                         <Button>Edit Profile</Button>
                       </Link>
-                      <Button variant="outline" size="icon">
-                        <Share2 className="h-4 w-4" />
-                      </Button>
+                      <ShareProfileButton userId={id} userName={profile.full_name} />
                     </>
                   ) : currentUser ? (
                     <>
@@ -149,14 +193,15 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                         targetUserId={id}
                         initialIsFollowing={isUserFollowing}
                       />
-                      <Button variant="outline" size="icon">
-                        <Share2 className="h-4 w-4" />
-                      </Button>
+                      <ShareProfileButton userId={id} userName={profile.full_name} />
                     </>
                   ) : (
-                    <Link href="/auth/login">
-                      <Button>Follow</Button>
-                    </Link>
+                    <>
+                      <Link href="/auth/login">
+                        <Button>Follow</Button>
+                      </Link>
+                      <ShareProfileButton userId={id} userName={profile.full_name} />
+                    </>
                   )}
                 </div>
               </div>
@@ -264,13 +309,21 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     <span className="text-sm">{profile.email}</span>
                   </div>
                 )}
+                {profile.contact_number && (
+                  <div className="flex items-center gap-3">
+                    <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    <span className="text-sm">{profile.contact_number}</span>
+                  </div>
+                )}
                 {profile.location && (
                   <div className="flex items-center gap-3">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">{profile.location}</span>
                   </div>
                 )}
-                {!profile.email && !profile.location && (
+                {!profile.email && !profile.location && !profile.contact_number && (
                   <p className="text-sm text-muted-foreground">No contact information available</p>
                 )}
               </CardContent>

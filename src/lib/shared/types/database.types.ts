@@ -2,7 +2,7 @@
 // These types match the Supabase schema defined in /supabase/migrations
 // To regenerate from Supabase: npx supabase gen types typescript --project-id YOUR_PROJECT_ID > src/lib/shared/types/database.types.ts
 
-export type UserRole = 'dentist' | 'clinic_owner';
+export type UserRole = 'student' | 'professional' | 'clinic_owner';
 
 export type ProcedureType =
   | 'crown'
@@ -39,6 +39,7 @@ export interface User {
   location?: string;
   bio?: string;
   profile_photo_url?: string;
+  contact_number?: string;
   linkedin_url?: string;
   instagram_url?: string;
   twitter_url?: string;
@@ -194,4 +195,27 @@ export interface ForumReply {
   updated_at: string;
   users?: User;
   replies?: ForumReply[];
+}
+
+export type NotificationType =
+  | 'follower'
+  | 'case_save'
+  | 'case_view'
+  | 'forum_reply'
+  | 'thread_like'
+  | 'reply_like'
+  | 'system';
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  actor_id?: string;
+  type: NotificationType;
+  title: string;
+  content?: string;
+  link?: string;
+  is_read: boolean;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  actor?: User;
 }

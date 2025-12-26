@@ -7,17 +7,62 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { getCase, hasSavedCase, incrementCaseViews } from '@/lib/backend/actions/case';
 import { hasUserReportedCase } from '@/lib/backend/actions/report';
-import { Eye, Bookmark, Calendar, Share2, Tag, FileText, User, Edit } from 'lucide-react';
+import { Eye, Bookmark, Calendar, Tag, FileText, User, Edit } from 'lucide-react';
 import Image from 'next/image';
 import { PROCEDURE_TYPES } from '@/lib/shared/constants';
 import { SaveButton } from '@/components/cases/save-button';
 import { ReportButton } from '@/components/cases/report-button';
 import { DeleteCaseButton } from '@/components/cases/delete-button';
+import { ShareCaseButton } from '@/components/cases/share-button';
 import { CaseNotesDisplay } from '@/components/cases/case-notes-display';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import type { Metadata } from 'next';
 
 interface CaseDetailPageProps {
   params: Promise<{ id: string }>;
+}
+
+// Generate SEO metadata for sharing
+export async function generateMetadata({ params }: CaseDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+
+  try {
+    const caseData = await getCase(id);
+    const procedureLabel = PROCEDURE_TYPES.find(p => p.value === caseData.procedure_type)?.label || caseData.procedure_type;
+
+    const title = `${caseData.title} | Network32`;
+    const description = `${procedureLabel} case by ${caseData.users?.full_name || 'a dental professional'} on Network32 - The Professional Network for Dentists`;
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: 'article',
+        siteName: 'Network32',
+        images: [
+          {
+            url: caseData.after_image_url,
+            width: 1200,
+            height: 630,
+            alt: `${caseData.title} - After Treatment`,
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        images: [caseData.after_image_url],
+      },
+    };
+  } catch {
+    return {
+      title: 'Clinical Case | Network32',
+      description: 'View clinical cases shared by dental professionals on Network32',
+    };
+  }
 }
 
 export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
@@ -122,9 +167,12 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                   <ReportButton caseId={id} userId={user.id} hasReported={hasReported} />
                 </>
               )}
-              <Button variant="outline" size="icon">
-                <Share2 className="h-4 w-4" />
-              </Button>
+              <ShareCaseButton
+                caseId={id}
+                caseTitle={caseData.title}
+                authorName={caseData.users?.full_name}
+                procedureType={getProcedureLabel(caseData.procedure_type)}
+              />
             </div>
           </div>
         </CardContent>

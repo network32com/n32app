@@ -9,9 +9,10 @@ interface SaveButtonProps {
   caseId: string;
   userId: string;
   initialIsSaved: boolean;
+  size?: 'default' | 'sm' | 'lg' | 'icon';
 }
 
-export function SaveButton({ caseId, userId, initialIsSaved }: SaveButtonProps) {
+export function SaveButton({ caseId, userId, initialIsSaved, size = 'default' }: SaveButtonProps) {
   const [isSaved, setIsSaved] = useState(initialIsSaved);
   const [loading, setLoading] = useState(false);
 
@@ -37,7 +38,7 @@ export function SaveButton({ caseId, userId, initialIsSaved }: SaveButtonProps) 
       onClick={handleToggleSave}
       disabled={loading}
       variant={isSaved ? 'default' : 'outline'}
-      size="sm"
+      size={size}
     >
       <Bookmark className={`mr-2 h-4 w-4 ${isSaved ? 'fill-current' : ''}`} />
       {loading ? 'Loading...' : isSaved ? 'Saved' : 'Save Case'}

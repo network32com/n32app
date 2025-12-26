@@ -27,8 +27,16 @@ export const SPECIALTIES = [
 ] as const;
 
 export const USER_ROLES = [
-    { value: 'dentist', label: 'Dentist' },
+    { value: 'student', label: 'Student' },
+    { value: 'professional', label: 'Professional' },
     { value: 'clinic_owner', label: 'Clinic Owner' },
+] as const;
+
+export const NAME_TITLES = [
+    { value: 'Dr.', label: 'Dr.' },
+    { value: 'Mr.', label: 'Mr.' },
+    { value: 'Ms.', label: 'Ms.' },
+    { value: 'Mrs.', label: 'Mrs.' },
 ] as const;
 
 export const ROUTES = {

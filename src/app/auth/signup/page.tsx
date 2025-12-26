@@ -13,7 +13,6 @@ export default function SignUpPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -31,9 +30,6 @@ export default function SignUpPage() {
         email,
         password,
         options: {
-          data: {
-            full_name: fullName,
-          },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
@@ -47,7 +43,6 @@ export default function SignUpPage() {
         // Clear form
         setEmail('');
         setPassword('');
-        setFullName('');
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred during sign up');
@@ -125,19 +120,6 @@ export default function SignUpPage() {
 
           <form onSubmit={handleSignUp} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                type="text"
-                placeholder="Dr. John Smith"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -195,3 +177,4 @@ export default function SignUpPage() {
     </div>
   );
 }
+

@@ -16,10 +16,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import Link from 'next/link';
-import { Eye, Bookmark, Plus, Search, Share2, Clock, MapPin, X } from 'lucide-react';
+import { Eye, Bookmark, Plus, Search, Clock, MapPin, X } from 'lucide-react';
 import Image from 'next/image';
 import { PROCEDURE_TYPES, SPECIALTIES } from '@/lib/shared/constants';
 import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
+import { ShareCaseButton } from '@/components/cases/share-button';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -161,26 +162,7 @@ export default function CasesPage() {
     }
   };
 
-  const handleShareCase = async (caseId: string, title: string) => {
-    const url = `${window.location.origin}/cases/${caseId}`;
 
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `Clinical Case: ${title}`,
-          text: 'Check out this clinical case on Network32',
-          url: url,
-        });
-      } catch (err) {
-        // User cancelled or share failed, fallback to clipboard
-        await navigator.clipboard.writeText(url);
-        toast.success('Link copied to clipboard!');
-      }
-    } else {
-      await navigator.clipboard.writeText(url);
-      toast.success('Link copied to clipboard!');
-    }
-  };
 
   return (
     <ClientDashboardLayout currentPath="/cases">
@@ -473,26 +455,23 @@ export default function CasesPage() {
                 {/* Action Buttons */}
                 <div className="mt-auto flex gap-2">
                   <Link href={`/cases/${caseItem.id}`} className="flex-1">
-                    <Button className="w-full" size="sm">
+                    <Button className="w-full">
                       View Full Case
                     </Button>
                   </Link>
                   <Button
                     variant="outline"
-                    size="sm"
                     aria-label="Save case"
                     onClick={() => handleSaveCase(caseItem.id)}
                   >
                     <Bookmark className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    aria-label="Share case"
-                    onClick={() => handleShareCase(caseItem.id, caseItem.title)}
-                  >
-                    <Share2 className="h-4 w-4" />
-                  </Button>
+                  <ShareCaseButton
+                    caseId={caseItem.id}
+                    caseTitle={caseItem.title}
+                    authorName={caseItem.author?.full_name}
+                    procedureType={getProcedureLabel(caseItem.procedure_type)}
+                  />
                 </div>
               </CardContent>
             </Card>

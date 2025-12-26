@@ -8,6 +8,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import Link from 'next/link';
 import { Users, UserMinus, MapPin, GraduationCap } from 'lucide-react';
 import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
@@ -29,6 +39,7 @@ export default function FollowingPage() {
     const [loading, setLoading] = useState(true);
     const [following, setFollowing] = useState<FollowedUser[]>([]);
     const [unfollowingId, setUnfollowingId] = useState<string | null>(null);
+    const [userToUnfollow, setUserToUnfollow] = useState<FollowedUser | null>(null);
 
     useEffect(() => {
         loadFollowing();
@@ -116,6 +127,7 @@ export default function FollowingPage() {
             console.error('Error:', error);
         } finally {
             setUnfollowingId(null);
+            setUserToUnfollow(null);
         }
     };
 
@@ -195,14 +207,27 @@ export default function FollowingPage() {
                                     </Link>
 
                                     <div className="min-w-0 flex-1">
-                                        <Link href={`/profile/${user.id}`}>
-                                            <h3 className="truncate font-semibold hover:text-primary">
-                                                {user.full_name}
-                                            </h3>
-                                        </Link>
+                                        <div className="flex items-start justify-between gap-2">
+                                            <Link href={`/profile/${user.id}`}>
+                                                <h3 className="truncate font-semibold hover:text-primary">
+                                                    {user.full_name}
+                                                </h3>
+                                            </Link>
+                                            {/* Unfollow Button - Top Right */}
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setUserToUnfollow(user)}
+                                                disabled={unfollowingId === user.id}
+                                                className="h-8 shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                            >
+                                                <UserMinus className="h-4 w-4" />
+                                                <span className="ml-1 hidden sm:inline">Unfollow</span>
+                                            </Button>
+                                        </div>
 
                                         {user.headline && (
-                                            <p className="truncate text-sm text-muted-foreground">
+                                            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                                                 {user.headline}
                                             </p>
                                         )}
@@ -229,25 +254,34 @@ export default function FollowingPage() {
                                         )}
                                     </div>
                                 </div>
-
-                                {/* Unfollow Button */}
-                                <div className="mt-4 flex justify-end">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleUnfollow(user.id)}
-                                        disabled={unfollowingId === user.id}
-                                        className="text-destructive hover:text-destructive"
-                                    >
-                                        <UserMinus className="mr-2 h-4 w-4" />
-                                        {unfollowingId === user.id ? 'Unfollowing...' : 'Unfollow'}
-                                    </Button>
-                                </div>
                             </CardContent>
                         </Card>
                     ))}
                 </div>
             )}
+
+            {/* Unfollow Confirmation Modal */}
+            <AlertDialog open={!!userToUnfollow} onOpenChange={(open) => !open && setUserToUnfollow(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Unfollow {userToUnfollow?.full_name}?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            You will no longer see their cases and updates in your feed. You can always follow them again later.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={!!unfollowingId}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => userToUnfollow && handleUnfollow(userToUnfollow.id)}
+                            disabled={!!unfollowingId}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            {unfollowingId ? 'Unfollowing...' : 'Unfollow'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </ClientDashboardLayout>
     );
 }
+

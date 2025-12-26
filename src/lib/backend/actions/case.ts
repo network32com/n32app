@@ -162,7 +162,7 @@ export async function deleteCase(caseId: string, userId: string) {
     revalidatePath('/dashboard');
 }
 
-export async function uploadCaseImage(userId: string, file: File, type: string) {
+export async function uploadCaseImage(userId: string, file: File, type: string, userName?: string) {
     const supabase = await createClient();
 
     // Generate unique filename
@@ -170,11 +170,21 @@ export async function uploadCaseImage(userId: string, file: File, type: string) 
     const timestamp = Date.now();
     const fileName = `${userId}/${timestamp}-${type}.${fileExt}`;
 
+    // Convert File to Buffer for processing
+    const arrayBuffer = await file.arrayBuffer();
+    let imageBuffer: Buffer = Buffer.from(new Uint8Array(arrayBuffer));
+
+    // Apply watermark if username is provided
+    if (userName) {
+        const { addWatermark } = await import('@/lib/backend/utils/watermark');
+        imageBuffer = await addWatermark(imageBuffer, userName);
+    }
+
     // Upload to storage
     const { data: uploadData, error: uploadError } = await supabase.storage
         .from('case-images')
-        .upload(fileName, file, {
-            contentType: file.type,
+        .upload(fileName, imageBuffer, {
+            contentType: 'image/jpeg',
         });
 
     if (uploadError) {
