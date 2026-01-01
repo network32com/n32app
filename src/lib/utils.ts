@@ -30,8 +30,9 @@ export function getInitials(name: string): string {
  */
 export function getURL() {
   let url =
-    process.env.NEXT_PUBLIC_APP_URL ?? // Defined in your env vars
-    process.env.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel for preview deployments
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXT_PUBLIC_VERCEL_URL ||
+    (typeof window !== 'undefined' && window.location.origin) ||
     'http://localhost:3000/';
 
   // Make sure to include `https://` when not localhost
