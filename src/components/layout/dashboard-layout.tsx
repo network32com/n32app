@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, FileText, Users, Building2, Menu, Rss } from 'lucide-react';
+import { Home, FileText, Users, Building2, Menu, Rss, ShieldCheck } from 'lucide-react';
 import { Logo } from '@/components/ui/logo';
 import {
   LayoutDashboard,
@@ -131,6 +131,18 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
           Saved Cases
         </Button>
       </Link>
+      {userData?.role === 'admin' && (
+        <Link href="/admin">
+          <Button
+            variant={isActive('/admin') || currentPath?.startsWith('/admin') ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary font-medium"
+            size="sm"
+          >
+            <ShieldCheck className="mr-2 h-4 w-4" />
+            Admin Panel
+          </Button>
+        </Link>
+      )}
     </>
   );
 
@@ -191,7 +203,7 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
         </header>
 
         {/* Page Content */}
-        <main className="p-6">{children}</main>
+        <main className="p-4 md:p-6">{children}</main>
       </div>
     </div>
   );

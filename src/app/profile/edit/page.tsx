@@ -578,9 +578,9 @@ function ProfileEditContent() {
                 {/* Name Fields */}
                 <div className="space-y-4">
                   <Label className="text-base font-semibold">Your Name</Label>
-                  <div className="grid gap-4 md:grid-cols-4">
+                  <div className="grid gap-4 md:grid-cols-12">
                     {/* Title Dropdown */}
-                    <div className="space-y-2">
+                    <div className="space-y-2 md:col-span-1">
                       <Label htmlFor="title">Title</Label>
                       <Select value={title} onValueChange={setTitle} disabled={submitting}>
                         <SelectTrigger>
@@ -597,7 +597,7 @@ function ProfileEditContent() {
                     </div>
 
                     {/* First Name */}
-                    <div className="space-y-2 md:col-span-1">
+                    <div className="space-y-2 md:col-span-5">
                       <Label htmlFor="firstName">First Name *</Label>
                       <Input
                         id="firstName"
@@ -610,7 +610,7 @@ function ProfileEditContent() {
                     </div>
 
                     {/* Last Name */}
-                    <div className="space-y-2 md:col-span-2">
+                    <div className="space-y-2 md:col-span-6">
                       <Label htmlFor="lastName">Last Name *</Label>
                       <Input
                         id="lastName"
@@ -624,7 +624,7 @@ function ProfileEditContent() {
                   </div>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-6 md:grid-cols-3">
                   {/* Degree */}
                   <div className="space-y-2">
                     <Label htmlFor="degree">Degree</Label>
@@ -637,20 +637,6 @@ function ProfileEditContent() {
                     />
                   </div>
 
-                  {/* Headline */}
-                  <div className="space-y-2">
-                    <Label htmlFor="headline">Professional Headline</Label>
-                    <Input
-                      id="headline"
-                      value={profile.headline || ''}
-                      onChange={(e) => setProfile({ ...profile, headline: e.target.value })}
-                      disabled={submitting}
-                      placeholder="e.g., Cosmetic Dentist"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-6 md:grid-cols-2">
                   {/* Specialty */}
                   <div className="space-y-2">
                     <Label htmlFor="specialty">Specialty</Label>
@@ -685,6 +671,18 @@ function ProfileEditContent() {
                       placeholder="e.g., New York, NY"
                     />
                   </div>
+                </div>
+
+                {/* Professional Headline - Dedicated Row */}
+                <div className="space-y-2">
+                  <Label htmlFor="headline">Professional Headline</Label>
+                  <Input
+                    id="headline"
+                    value={profile.headline || ''}
+                    onChange={(e) => setProfile({ ...profile, headline: e.target.value })}
+                    disabled={submitting}
+                    placeholder="e.g., Cosmetic Dentist"
+                  />
                 </div>
 
                 {/* Contact Number */}

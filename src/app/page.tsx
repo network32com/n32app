@@ -25,7 +25,7 @@ export default async function Home() {
               <Button variant="ghost">Log In</Button>
             </Link>
             <Link href="/auth/signup">
-              <Button>Join the Community</Button>
+              <Button>Join as a Dentist</Button>
             </Link>
           </div>
         </div>
@@ -36,19 +36,19 @@ export default async function Home() {
         <div className="container mx-auto max-w-6xl px-4 py-16 md:py-24">
           <div className="max-w-3xl mx-auto text-center">
             <div className="mb-4 inline-block rounded-full bg-primary/10 px-4 py-1 text-sm font-medium text-primary">
-              By Dentists, For Dentists
+              A community space for dentists only
             </div>
             <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-              The Professional Network Built by Practitioners
+              A place to share cases, learn from peers,<br />
+              and grow your practice
             </h1>
             <p className="mb-8 text-lg text-muted-foreground sm:text-xl">
-              Join a growing community of dental professionals sharing clinical cases,
-              learning from peers, and advancing their practice together.
+              Network32 is where dentists share real work, ask honest questions, and learn from each other — without noise.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Link href="/auth/signup">
                 <Button size="lg" className="w-full sm:w-auto">
-                  Get Started Free
+                  Create Your Profile
                 </Button>
               </Link>
               <Link href="/auth/login">
@@ -66,7 +66,7 @@ export default async function Home() {
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">Why Network32?</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Built by dental professionals who understand your challenges and workflow
+                Built by dentists who know what your day actually looks like
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -108,7 +108,7 @@ export default async function Home() {
                 </div>
                 <h3 className="mb-2 font-semibold">Privacy First</h3>
                 <p className="text-sm text-muted-foreground">
-                  HIPAA-aware platform with patient consent built-in
+                  Patient consent is required. Privacy comes first.
                 </p>
               </div>
 
@@ -122,7 +122,7 @@ export default async function Home() {
                 </div>
                 <h3 className="mb-2 font-semibold">Professional Growth</h3>
                 <p className="text-sm text-muted-foreground">
-                  Expand your network and discover new techniques
+                  Pick up ideas, techniques, and connections over time
                 </p>
               </div>
             </div>
@@ -221,7 +221,7 @@ export default async function Home() {
                   </svg>
                 </div>
               </div>
-              <h3 className="mb-2 text-xl font-semibold text-center">HIPAA-Aware Platform</h3>
+              <h3 className="mb-2 text-xl font-semibold text-center">Privacy-aware by Design</h3>
               <p className="text-muted-foreground text-center">
                 Built with patient privacy in mind. Patient consent required for all shared
                 cases and PHI protection built-in.
@@ -279,20 +279,19 @@ export default async function Home() {
         {/* CTA Section */}
         <div className="container mx-auto max-w-4xl px-4 py-16">
           <div className="rounded-2xl border border-border bg-card p-8 md:p-12 text-center">
-            <h2 className="text-3xl font-bold mb-4">Ready to Join?</h2>
+            <h2 className="text-3xl font-bold mb-4">Join other dentists on Network32</h2>
             <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Be part of a growing community of dental professionals committed to learning,
-              sharing, and advancing the field together.
+              Dentists use Network32 to share work, learn faster, and connect with the right peers.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Link href="/auth/signup">
                 <Button size="lg" className="w-full sm:w-auto">
-                  Create Your Free Account
+                  Create Your Profile
                 </Button>
               </Link>
             </div>
             <p className="text-sm text-muted-foreground mt-4">
-              No credit card required • Join in seconds
+              No money required • Join in seconds
             </p>
           </div>
         </div>

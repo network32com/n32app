@@ -5,13 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
+import Image from 'next/image';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { getForumThread, getThreadReplies } from '@/lib/backend/actions/forum';
+import { getForumThread, getThreadReplies, hasLikedThread, getThreadLikesCount, trackThreadView } from '@/lib/backend/actions/forum';
 import { getCategoryLabel, getCategoryColor } from '@/lib/shared/constants/forum';
-import { MessageSquare, Eye, Clock, User, ArrowLeft, Share2, Edit } from 'lucide-react';
+import { MessageSquare, Eye, Clock, User, ArrowLeft, Share2, Edit, Heart } from 'lucide-react';
 import { ReplyForm } from '@/components/forum/reply-form';
 import { ReplyItem } from '@/components/forum/reply-item';
 import { DeleteThreadButton } from '@/components/forum/delete-thread-button';
+import { ThreadLikeButton } from '@/components/forum/thread-like-button';
 
 interface ThreadPageProps {
   params: Promise<{ id: string }>;
@@ -31,9 +33,21 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
 
   let thread;
   let replies;
+  let isLiked = false;
+  let likesCount = 0;
 
   try {
+    // Track view first (so the count is updated before we fetch)
+    await trackThreadView(id);
+
+    // Now fetch thread data with updated view count
     [thread, replies] = await Promise.all([getForumThread(id), getThreadReplies(id)]);
+
+    // Get like status and count
+    [isLiked, likesCount] = await Promise.all([
+      hasLikedThread(id, user.id),
+      getThreadLikesCount(id),
+    ]);
   } catch (error) {
     redirect('/forum');
   }
@@ -89,7 +103,7 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
                 ))}
               </div>
 
-              <h1 className="text-3xl font-bold mb-4">{thread.title}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold mb-4">{thread.title}</h1>
 
               <div className="flex items-start gap-4 mb-6">
                 <Avatar className="h-12 w-12 rounded-lg">
@@ -128,16 +142,22 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 justify-end sm:flex-nowrap">
+                  <ThreadLikeButton
+                    threadId={id}
+                    userId={user.id}
+                    initialLiked={isLiked}
+                    initialCount={likesCount}
+                  />
                   {isAuthor && (
-                    <>
+                    <div className="flex gap-2">
                       <Link href={`/forum/${id}/edit`}>
                         <Button variant="outline" size="icon">
                           <Edit className="h-4 w-4" />
                         </Button>
                       </Link>
                       <DeleteThreadButton threadId={id} userId={user.id} />
-                    </>
+                    </div>
                   )}
                   <Button variant="outline" size="icon">
                     <Share2 className="h-4 w-4" />
@@ -148,6 +168,31 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
               <div className="prose prose-sm max-w-none dark:prose-invert">
                 <p className="whitespace-pre-wrap leading-relaxed">{thread.body}</p>
               </div>
+
+              {/* Thread Images */}
+              {thread.image_urls && thread.image_urls.length > 0 && (
+                <div className="mt-6 pt-6 border-t">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-3">Attachments</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {thread.image_urls.map((url, index) => (
+                      <a
+                        key={index}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="relative aspect-video rounded-lg overflow-hidden border hover:opacity-90 transition-opacity"
+                      >
+                        <Image
+                          src={url}
+                          alt={`Attachment ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -256,6 +301,10 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
               <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
                 <span className="text-sm text-muted-foreground">Views</span>
                 <span className="font-medium">{thread.views_count}</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
+                <span className="text-sm text-muted-foreground">Likes</span>
+                <span className="font-medium">{likesCount}</span>
               </div>
               <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
                 <span className="text-sm text-muted-foreground">Created</span>

@@ -108,3 +108,58 @@ export async function deleteAccount(): Promise<{ success: boolean; error?: strin
         return { success: false, error: error.message || 'Failed to delete account' };
     }
 }
+
+/**
+ * Change the current user's password
+ * This action requires the user to be authenticated and verifies the current password
+ */
+export async function changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { success: false, error: 'Not authenticated' };
+    }
+
+    if (!user.email) {
+        return { success: false, error: 'No email associated with this account' };
+    }
+
+    if (!currentPassword) {
+        return { success: false, error: 'Current password is required' };
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+        return { success: false, error: 'New password must be at least 6 characters' };
+    }
+
+    try {
+        // Verify current password by attempting to sign in
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: user.email,
+            password: currentPassword,
+        });
+
+        if (signInError) {
+            return { success: false, error: 'Current password is incorrect' };
+        }
+
+        // Update to new password
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+        if (error) {
+            return { success: false, error: error.message };
+        }
+
+        // Sign out user so they re-authenticate with new password
+        await supabase.auth.signOut();
+
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error changing password:', error);
+        return { success: false, error: error.message || 'Failed to change password' };
+    }
+}

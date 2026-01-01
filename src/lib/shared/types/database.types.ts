@@ -15,6 +15,15 @@ export type ProcedureType =
   | 'filling'
   | 'bridge'
   | 'denture'
+  | 'rct'
+  | 'restorations'
+  | 'cosmetics'
+  | 'prosthesis'
+  | 'periodontic_surgeries'
+  | 'implants'
+  | 'extractions'
+  | 'surgeries'
+  | 'fmr'
   | 'other';
 
 export type Specialty =
@@ -174,6 +183,7 @@ export interface ForumThread {
   body: string;
   category: ForumCategory;
   tags: string[];
+  image_urls: string[];
   views_count: number;
   replies_count: number;
   is_pinned: boolean;
