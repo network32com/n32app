@@ -2,7 +2,7 @@
 // These types match the Supabase schema defined in /supabase/migrations
 // To regenerate from Supabase: npx supabase gen types typescript --project-id YOUR_PROJECT_ID > src/lib/shared/types/database.types.ts
 
-export type UserRole = 'dentist' | 'clinic_owner';
+export type UserRole = 'student' | 'professional' | 'clinic_owner';
 
 export type ProcedureType =
   | 'crown'
@@ -15,6 +15,15 @@ export type ProcedureType =
   | 'filling'
   | 'bridge'
   | 'denture'
+  | 'rct'
+  | 'restorations'
+  | 'cosmetics'
+  | 'prosthesis'
+  | 'periodontic_surgeries'
+  | 'implants'
+  | 'extractions'
+  | 'surgeries'
+  | 'fmr'
   | 'other';
 
 export type Specialty =
@@ -24,6 +33,7 @@ export type Specialty =
   | 'periodontics'
   | 'prosthodontics'
   | 'oral_surgery'
+  | 'oral_medicine_radiology'
   | 'pediatric_dentistry'
   | 'cosmetic_dentistry';
 
@@ -38,9 +48,46 @@ export interface User {
   location?: string;
   bio?: string;
   profile_photo_url?: string;
+  contact_number?: string;
+  linkedin_url?: string;
+  instagram_url?: string;
+  twitter_url?: string;
+  facebook_url?: string;
   onboarding_completed: boolean;
   terms_accepted: boolean;
   terms_accepted_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserEducation {
+  id: string;
+  user_id: string;
+  institution: string;
+  degree?: string;
+  field?: string;
+  year?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserCertification {
+  id: string;
+  user_id: string;
+  name: string;
+  issuer?: string;
+  year?: string;
+  credential?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserAchievement {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  year?: string;
   created_at: string;
   updated_at: string;
 }
@@ -62,6 +109,13 @@ export interface Clinic {
   updated_at: string;
 }
 
+export interface SavedCase {
+  id: string;
+  user_id: string;
+  case_id: string;
+  created_at: string;
+}
+
 export interface ClinicalCase {
   id: string;
   user_id: string;
@@ -71,6 +125,8 @@ export interface ClinicalCase {
   tags: string[];
   before_image_url: string;
   after_image_url: string;
+  accessory_photos?: string[];
+  location?: string;
   patient_consent_given: boolean;
   consent_timestamp: string;
   views_count: number;
@@ -127,6 +183,7 @@ export interface ForumThread {
   body: string;
   category: ForumCategory;
   tags: string[];
+  image_urls: string[];
   views_count: number;
   replies_count: number;
   is_pinned: boolean;
@@ -148,4 +205,27 @@ export interface ForumReply {
   updated_at: string;
   users?: User;
   replies?: ForumReply[];
+}
+
+export type NotificationType =
+  | 'follower'
+  | 'case_save'
+  | 'case_view'
+  | 'forum_reply'
+  | 'thread_like'
+  | 'reply_like'
+  | 'system';
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  actor_id?: string;
+  type: NotificationType;
+  title: string;
+  content?: string;
+  link?: string;
+  is_read: boolean;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  actor?: User;
 }

@@ -8,9 +8,30 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      // On error, redirect to login with error message
+      return NextResponse.redirect(`${origin}/auth/login?error=${encodeURIComponent(error.message)}`);
+    }
+
+    // Check if user has completed onboarding
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      const { data: userData } = await supabase
+        .from('users')
+        .select('onboarding_completed')
+        .eq('id', user.id)
+        .single();
+
+      // Redirect based on onboarding status
+      if (userData?.onboarding_completed) {
+        return NextResponse.redirect(`${origin}/dashboard`);
+      }
+    }
   }
 
-  // URL to redirect to after sign in process completes
+  // Default: redirect to onboarding for new users or users who haven't completed it
   return NextResponse.redirect(`${origin}/onboarding`);
 }

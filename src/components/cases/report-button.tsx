@@ -28,6 +28,7 @@ interface ReportButtonProps {
   caseId: string;
   userId: string;
   hasReported: boolean;
+  size?: 'default' | 'sm' | 'lg' | 'icon';
 }
 
 const REPORT_REASONS = [
@@ -40,7 +41,7 @@ const REPORT_REASONS = [
   { value: 'other', label: 'Other' },
 ];
 
-export function ReportButton({ caseId, userId, hasReported }: ReportButtonProps) {
+export function ReportButton({ caseId, userId, hasReported, size = 'default' }: ReportButtonProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [reason, setReason] = useState('');
@@ -72,7 +73,7 @@ export function ReportButton({ caseId, userId, hasReported }: ReportButtonProps)
 
   if (hasReported) {
     return (
-      <Button variant="outline" size="sm" disabled>
+      <Button variant="outline" size={size} disabled>
         <Flag className="mr-2 h-4 w-4" />
         Reported
       </Button>
@@ -82,7 +83,7 @@ export function ReportButton({ caseId, userId, hasReported }: ReportButtonProps)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size={size}>
           <Flag className="mr-2 h-4 w-4" />
           Report
         </Button>

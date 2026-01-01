@@ -13,15 +13,22 @@ import {
   getFollowingCount,
   getCaseCount,
   isFollowing,
+  getUserEducations,
+  getUserCertifications,
+  getUserAchievements,
 } from '@/lib/backend/actions/profile';
+import { SPECIALTIES } from '@/lib/shared/constants';
 import { FollowButton } from '@/components/profile/follow-button';
+import { ShareProfileButton } from '@/components/profile/share-profile-button';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import {
   MapPin,
   Mail,
   Globe,
   Linkedin,
-  Share2,
+  Instagram,
+  Twitter,
+  Facebook,
   Eye,
   FileText,
   Users,
@@ -29,9 +36,55 @@ import {
   GraduationCap,
   Briefcase,
 } from 'lucide-react';
+import type { Metadata } from 'next';
 
 interface ProfilePageProps {
   params: Promise<{ id: string }>;
+}
+
+// Generate SEO metadata for profile sharing
+export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
+  const { id } = await params;
+
+  try {
+    const profile = await getUserProfile(id);
+    const specialtyLabel = SPECIALTIES.find(s => s.value === profile.specialty)?.label;
+
+    const title = `${profile.full_name} | Network32`;
+    const description = profile.headline
+      ? `${profile.headline} - ${specialtyLabel || profile.role} on Network32`
+      : `${specialtyLabel || profile.role.replace(/_/g, ' ')} on Network32 - The Professional Network for Dentists`;
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: 'profile',
+        siteName: 'Network32',
+        images: profile.profile_photo_url ? [
+          {
+            url: profile.profile_photo_url,
+            width: 400,
+            height: 400,
+            alt: profile.full_name,
+          },
+        ] : [],
+      },
+      twitter: {
+        card: 'summary',
+        title,
+        description,
+        images: profile.profile_photo_url ? [profile.profile_photo_url] : [],
+      },
+    };
+  } catch {
+    return {
+      title: 'Profile | Network32',
+      description: 'View professional profiles on Network32 - The Professional Network for Dentists',
+    };
+  }
 }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
@@ -49,11 +102,22 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     redirect('/dashboard');
   }
 
-  const [followerCount, followingCount, caseCount, isUserFollowing] = await Promise.all([
+  const [
+    followerCount,
+    followingCount,
+    caseCount,
+    isUserFollowing,
+    educations,
+    certifications,
+    achievements,
+  ] = await Promise.all([
     getFollowerCount(id),
     getFollowingCount(id),
     getCaseCount(id),
     currentUser ? isFollowing(currentUser.id, id) : Promise.resolve(false),
+    getUserEducations(id),
+    getUserCertifications(id),
+    getUserAchievements(id),
   ]);
 
   // Fetch user's cases
@@ -100,7 +164,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   <div className="mt-3 flex flex-wrap gap-2">
                     {profile.specialty && (
                       <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                        {profile.specialty.replace(/_/g, ' ')}
+                        {SPECIALTIES.find((s) => s.value === profile.specialty)?.label ?? profile.specialty.replace(/_/g, ' ')}
                       </Badge>
                     )}
                     <Badge variant="secondary">{profile.role.replace(/_/g, ' ')}</Badge>
@@ -120,9 +184,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                       <Link href="/profile/edit">
                         <Button>Edit Profile</Button>
                       </Link>
-                      <Button variant="outline" size="icon">
-                        <Share2 className="h-4 w-4" />
-                      </Button>
+                      <ShareProfileButton userId={id} userName={profile.full_name} />
                     </>
                   ) : currentUser ? (
                     <>
@@ -131,14 +193,15 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                         targetUserId={id}
                         initialIsFollowing={isUserFollowing}
                       />
-                      <Button variant="outline" size="icon">
-                        <Share2 className="h-4 w-4" />
-                      </Button>
+                      <ShareProfileButton userId={id} userName={profile.full_name} />
                     </>
                   ) : (
-                    <Link href="/auth/login">
-                      <Button>Follow</Button>
-                    </Link>
+                    <>
+                      <Link href="/auth/login">
+                        <Button>Follow</Button>
+                      </Link>
+                      <ShareProfileButton userId={id} userName={profile.full_name} />
+                    </>
                   )}
                 </div>
               </div>
@@ -152,20 +215,44 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   </div>
                   <p className="mt-1 text-2xl font-bold">{caseCount}</p>
                 </div>
-                <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950">
-                  <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                    <Users className="h-4 w-4" />
-                    <p className="text-xs font-medium">Followers</p>
+                {isOwnProfile ? (
+                  <Link href="/profile/followers" className="block">
+                    <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer">
+                      <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                        <Users className="h-4 w-4" />
+                        <p className="text-xs font-medium">Followers</p>
+                      </div>
+                      <p className="mt-1 text-2xl font-bold">{followerCount}</p>
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950">
+                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                      <Users className="h-4 w-4" />
+                      <p className="text-xs font-medium">Followers</p>
+                    </div>
+                    <p className="mt-1 text-2xl font-bold">{followerCount}</p>
                   </div>
-                  <p className="mt-1 text-2xl font-bold">{followerCount}</p>
-                </div>
-                <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950">
-                  <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                    <Users className="h-4 w-4" />
-                    <p className="text-xs font-medium">Following</p>
+                )}
+                {isOwnProfile ? (
+                  <Link href="/profile/following" className="block">
+                    <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer">
+                      <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                        <Users className="h-4 w-4" />
+                        <p className="text-xs font-medium">Following</p>
+                      </div>
+                      <p className="mt-1 text-2xl font-bold">{followingCount}</p>
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950">
+                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                      <Users className="h-4 w-4" />
+                      <p className="text-xs font-medium">Following</p>
+                    </div>
+                    <p className="mt-1 text-2xl font-bold">{followingCount}</p>
                   </div>
-                  <p className="mt-1 text-2xl font-bold">{followingCount}</p>
-                </div>
+                )}
                 <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950">
                   <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
                     <Eye className="h-4 w-4" />
@@ -183,6 +270,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="w-full justify-start">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="education">Education</TabsTrigger>
           <TabsTrigger value="cases">Clinical Cases</TabsTrigger>
           <TabsTrigger value="certifications">Certifications</TabsTrigger>
           <TabsTrigger value="achievements">Achievements</TabsTrigger>
@@ -221,13 +309,21 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     <span className="text-sm">{profile.email}</span>
                   </div>
                 )}
+                {profile.contact_number && (
+                  <div className="flex items-center gap-3">
+                    <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    <span className="text-sm">{profile.contact_number}</span>
+                  </div>
+                )}
                 {profile.location && (
                   <div className="flex items-center gap-3">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">{profile.location}</span>
                   </div>
                 )}
-                {!profile.email && !profile.location && (
+                {!profile.email && !profile.location && !profile.contact_number && (
                   <p className="text-sm text-muted-foreground">No contact information available</p>
                 )}
               </CardContent>
@@ -252,7 +348,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                   <div>
                     <p className="text-sm font-medium">Specialty</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {profile.specialty.replace(/_/g, ' ')}
+                      {SPECIALTIES.find((s) => s.value === profile.specialty)?.label ?? profile.specialty.replace(/_/g, ' ')}
                     </p>
                   </div>
                 )}
@@ -271,22 +367,83 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" disabled>
-                    <Linkedin className="mr-2 h-4 w-4" />
-                    LinkedIn
-                  </Button>
-                  <Button variant="outline" size="sm" disabled>
-                    <Globe className="mr-2 h-4 w-4" />
-                    Website
-                  </Button>
-                  <p className="w-full text-sm text-muted-foreground">
+                {(profile.linkedin_url || profile.twitter_url || profile.instagram_url || profile.facebook_url) ? (
+                  <div className="flex flex-wrap gap-3">
+                    {profile.linkedin_url && (
+                      <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm">
+                          <Linkedin className="mr-2 h-4 w-4 text-[#0077B5]" />
+                          LinkedIn
+                        </Button>
+                      </a>
+                    )}
+                    {profile.twitter_url && (
+                      <a href={profile.twitter_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm">
+                          <Twitter className="mr-2 h-4 w-4 text-[#1DA1F2]" />
+                          Twitter
+                        </Button>
+                      </a>
+                    )}
+                    {profile.instagram_url && (
+                      <a href={profile.instagram_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm">
+                          <Instagram className="mr-2 h-4 w-4 text-[#E4405F]" />
+                          Instagram
+                        </Button>
+                      </a>
+                    )}
+                    {profile.facebook_url && (
+                      <a href={profile.facebook_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="sm">
+                          <Facebook className="mr-2 h-4 w-4 text-[#1877F2]" />
+                          Facebook
+                        </Button>
+                      </a>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
                     {isOwnProfile ? 'Add social links in Edit Profile' : 'No social links available'}
                   </p>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Education Tab */}
+        <TabsContent value="education" className="space-y-6">
+          <Card>
+            <CardContent className="py-6">
+              {(!educations || educations.length === 0) ? (
+                <div className="py-6 text-center">
+                  <GraduationCap className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <p className="mt-4 text-muted-foreground">No education added yet</p>
+                  {isOwnProfile && (
+                    <Link href="/profile/edit?tab=education">
+                      <Button className="mt-4" variant="outline">
+                        Add Education
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {educations.map((edu: any) => (
+                    <div key={edu.id} className="rounded-md border p-4">
+                      <div className="flex flex-col gap-1">
+                        <p className="font-medium">{edu.institution}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {[edu.degree, edu.field, edu.year].filter(Boolean).join(' • ')}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Clinical Cases Tab */}
@@ -345,15 +502,37 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         {/* Certifications Tab */}
         <TabsContent value="certifications" className="space-y-6">
           <Card>
-            <CardContent className="py-12 text-center">
-              <Award className="mx-auto h-12 w-12 text-muted-foreground" />
-              <p className="mt-4 text-muted-foreground">No certifications added yet</p>
-              {isOwnProfile && (
-                <Link href="/profile/edit?tab=certifications">
-                  <Button className="mt-4" variant="outline">
-                    Add Certification
-                  </Button>
-                </Link>
+            <CardContent className="py-6">
+              {(!certifications || certifications.length === 0) ? (
+                <div className="py-6 text-center">
+                  <Award className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <p className="mt-4 text-muted-foreground">No certifications added yet</p>
+                  {isOwnProfile && (
+                    <Link href="/profile/edit?tab=certifications">
+                      <Button className="mt-4" variant="outline">
+                        Add Certification
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {certifications.map((cert: any) => (
+                    <div key={cert.id} className="rounded-md border p-4">
+                      <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <p className="font-medium">{cert.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {[cert.issuer, cert.year].filter(Boolean).join(' • ')}
+                          </p>
+                        </div>
+                        {cert.credential && (
+                          <p className="mt-2 text-xs text-muted-foreground md:mt-0">Credential: {cert.credential}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
@@ -362,15 +541,37 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         {/* Achievements Tab */}
         <TabsContent value="achievements" className="space-y-6">
           <Card>
-            <CardContent className="py-12 text-center">
-              <Award className="mx-auto h-12 w-12 text-muted-foreground" />
-              <p className="mt-4 text-muted-foreground">No achievements added yet</p>
-              {isOwnProfile && (
-                <Link href="/profile/edit?tab=achievements">
-                  <Button className="mt-4" variant="outline">
-                    Add Achievement
-                  </Button>
-                </Link>
+            <CardContent className="py-6">
+              {(!achievements || achievements.length === 0) ? (
+                <div className="py-6 text-center">
+                  <Award className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <p className="mt-4 text-muted-foreground">No achievements added yet</p>
+                  {isOwnProfile && (
+                    <Link href="/profile/edit?tab=achievements">
+                      <Button className="mt-4" variant="outline">
+                        Add Achievement
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {achievements.map((a: any) => (
+                    <div key={a.id} className="rounded-md border p-4">
+                      <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <p className="font-medium">{a.title}</p>
+                          {a.year && (
+                            <p className="text-sm text-muted-foreground">{a.year}</p>
+                          )}
+                        </div>
+                      </div>
+                      {a.description && (
+                        <p className="mt-2 text-sm text-muted-foreground">{a.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>

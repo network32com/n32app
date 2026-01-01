@@ -16,11 +16,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import Link from 'next/link';
-import { Eye, Bookmark, Plus, Search, Share2, Clock, MapPin } from 'lucide-react';
+import { Eye, Bookmark, Plus, Search, Clock, MapPin, X } from 'lucide-react';
 import Image from 'next/image';
 import { PROCEDURE_TYPES, SPECIALTIES } from '@/lib/shared/constants';
 import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
+import { ShareCaseButton } from '@/components/cases/share-button';
 import { formatDistanceToNow } from 'date-fns';
+import { toast } from 'sonner';
 
 export default function CasesPage() {
   const router = useRouter();
@@ -116,6 +118,52 @@ export default function CasesPage() {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
 
+  const handleSaveCase = async (caseId: string) => {
+    const supabase = createClient();
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error('Please log in to save cases');
+        return;
+      }
+
+      // Check if already saved
+      const { data: existing } = await supabase
+        .from('saved_cases')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('case_id', caseId)
+        .single();
+
+      if (existing) {
+        // Already saved, unsave it
+        await supabase
+          .from('saved_cases')
+          .delete()
+          .eq('id', existing.id);
+        toast.success('Case removed from saved');
+      } else {
+        // Save the case
+        await supabase
+          .from('saved_cases')
+          .insert({
+            user_id: user.id,
+            case_id: caseId,
+          });
+        toast.success('Case saved to your collection!');
+      }
+    } catch (error) {
+      console.error('Error saving case:', error);
+      toast.error('Failed to save case');
+    }
+  };
+
+
+
   return (
     <ClientDashboardLayout currentPath="/cases">
       {/* Header */}
@@ -139,19 +187,20 @@ export default function CasesPage() {
         <div className="flex flex-col gap-4">
           {/* Search Bar */}
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
               type="text"
               placeholder="Search cases by title or notes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
+              aria-label="Search clinical cases"
             />
           </div>
 
           {/* Filters */}
           <div className="flex flex-wrap gap-2">
-            <Select value={procedureFilter} onValueChange={setProcedureFilter}>
+            <Select value={procedureFilter} onValueChange={setProcedureFilter} aria-label="Filter by procedure type">
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Procedure Type" />
               </SelectTrigger>
@@ -165,7 +214,7 @@ export default function CasesPage() {
               </SelectContent>
             </Select>
 
-            <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
+            <Select value={specialtyFilter} onValueChange={setSpecialtyFilter} aria-label="Filter by specialty">
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Specialty" />
               </SelectTrigger>
@@ -185,25 +234,73 @@ export default function CasesPage() {
               value={locationFilter}
               onChange={(e) => setLocationFilter(e.target.value)}
               className="w-[180px]"
+              aria-label="Filter by location"
             />
 
             {(procedureFilter !== 'all' ||
               specialtyFilter !== 'all' ||
               locationFilter ||
               searchQuery) && (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setProcedureFilter('all');
-                  setSpecialtyFilter('all');
-                  setLocationFilter('');
-                  setSearchQuery('');
-                }}
-              >
-                Clear Filters
-              </Button>
-            )}
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setProcedureFilter('all');
+                    setSpecialtyFilter('all');
+                    setLocationFilter('');
+                    setSearchQuery('');
+                  }}
+                  aria-label="Clear all filters"
+                >
+                  Clear Filters
+                </Button>
+              )}
           </div>
+
+          {/* Active Filter Pills */}
+          {(procedureFilter !== 'all' || specialtyFilter !== 'all' || locationFilter || searchQuery) && (
+            <div className="flex flex-wrap gap-2">
+              {searchQuery && (
+                <Badge variant="secondary" className="gap-1">
+                  Search: {searchQuery}
+                  <X
+                    className="h-3 w-3 cursor-pointer hover:text-destructive"
+                    onClick={() => setSearchQuery('')}
+                    aria-label="Clear search"
+                  />
+                </Badge>
+              )}
+              {procedureFilter !== 'all' && (
+                <Badge variant="secondary" className="gap-1">
+                  {PROCEDURE_TYPES.find(p => p.value === procedureFilter)?.label}
+                  <X
+                    className="h-3 w-3 cursor-pointer hover:text-destructive"
+                    onClick={() => setProcedureFilter('all')}
+                    aria-label="Clear procedure filter"
+                  />
+                </Badge>
+              )}
+              {specialtyFilter !== 'all' && (
+                <Badge variant="secondary" className="gap-1">
+                  {SPECIALTIES.find(s => s.value === specialtyFilter)?.label}
+                  <X
+                    className="h-3 w-3 cursor-pointer hover:text-destructive"
+                    onClick={() => setSpecialtyFilter('all')}
+                    aria-label="Clear specialty filter"
+                  />
+                </Badge>
+              )}
+              {locationFilter && (
+                <Badge variant="secondary" className="gap-1">
+                  Location: {locationFilter}
+                  <X
+                    className="h-3 w-3 cursor-pointer hover:text-destructive"
+                    onClick={() => setLocationFilter('')}
+                    aria-label="Clear location filter"
+                  />
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -358,32 +455,29 @@ export default function CasesPage() {
                 {/* Action Buttons */}
                 <div className="mt-auto flex gap-2">
                   <Link href={`/cases/${caseItem.id}`} className="flex-1">
-                    <Button className="w-full" size="sm">
+                    <Button className="w-full">
                       View Full Case
                     </Button>
                   </Link>
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    aria-label="Save case"
+                    onClick={() => handleSaveCase(caseItem.id)}
+                  >
                     <Bookmark className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm">
-                    <Share2 className="h-4 w-4" />
-                  </Button>
+                  <ShareCaseButton
+                    caseId={caseItem.id}
+                    caseTitle={caseItem.title}
+                    authorName={caseItem.author?.full_name}
+                    procedureType={getProcedureLabel(caseItem.procedure_type)}
+                  />
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
-
-      {/* Floating Share Case Button */}
-      <Link href="/cases/create">
-        <Button
-          size="lg"
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg transition-transform hover:scale-110"
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
-      </Link>
     </ClientDashboardLayout>
   );
 }

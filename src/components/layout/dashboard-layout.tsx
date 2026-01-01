@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, FileText, Users, Building2, Menu, Rss } from 'lucide-react';
+import { Home, FileText, Users, Building2, Menu, Rss, ShieldCheck } from 'lucide-react';
 import { Logo } from '@/components/ui/logo';
 import {
   LayoutDashboard,
@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from './user-menu';
+import { NotificationBell } from '@/components/notifications/notification-bell';
+import { getUnreadCount } from '@/lib/backend/actions/notifications';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -40,6 +42,8 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
     .select('role, full_name, email, profile_photo_url')
     .eq('id', user.id)
     .single();
+
+  const unreadCount = await getUnreadCount();
 
   const isActive = (path: string) => currentPath === path;
 
@@ -127,6 +131,18 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
           Saved Cases
         </Button>
       </Link>
+      {userData?.role === 'admin' && (
+        <Link href="/admin">
+          <Button
+            variant={isActive('/admin') || currentPath?.startsWith('/admin') ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary font-medium"
+            size="sm"
+          >
+            <ShieldCheck className="mr-2 h-4 w-4" />
+            Admin Panel
+          </Button>
+        </Link>
+      )}
     </>
   );
 
@@ -169,16 +185,8 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
 
           {/* Right side actions */}
           <div className="ml-auto flex items-center gap-2">
-            {/* Future: Notifications */}
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              {/* <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" /> */}
-            </Button>
-
-            {/* Future: Messages */}
-            <Button variant="ghost" size="icon">
-              <MessageSquare className="h-5 w-5" />
-            </Button>
+            {/* Notifications */}
+            <NotificationBell userId={user.id} initialUnreadCount={unreadCount} />
 
             {/* User Menu */}
             {userData && (
@@ -195,7 +203,7 @@ export async function DashboardLayout({ children, currentPath }: DashboardLayout
         </header>
 
         {/* Page Content */}
-        <main className="p-6">{children}</main>
+        <main className="p-4 md:p-6">{children}</main>
       </div>
     </div>
   );

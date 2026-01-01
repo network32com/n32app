@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/shared/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,16 +18,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { SPECIALTIES } from '@/lib/shared/constants';
+import { SPECIALTIES, NAME_TITLES } from '@/lib/shared/constants';
 import type { User, Specialty } from '@/lib/shared/types/database.types';
-import { Upload, X, User as UserIcon, GraduationCap, Award, Plus, Trash2 } from 'lucide-react';
+import { Upload, X, User as UserIcon, GraduationCap, Award, Plus, Trash2, Linkedin, Instagram, Twitter, Facebook } from 'lucide-react';
+import { toast } from 'sonner';
 import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
 
 function ProfileEditContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
-  
+
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -42,10 +44,20 @@ function ProfileEditContent() {
     location: '',
     bio: '',
     profile_photo_url: '',
+    contact_number: '',
+    linkedin_url: '',
+    instagram_url: '',
+    twitter_url: '',
+    facebook_url: '',
   });
 
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
+  // Separate name fields
+  const [title, setTitle] = useState<string>('Dr.');
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
 
   // Education state
   const [education, setEducation] = useState([
@@ -61,6 +73,14 @@ function ProfileEditContent() {
   const [achievements, setAchievements] = useState([
     { title: '', description: '', year: '' },
   ]);
+
+  const [savingEducation, setSavingEducation] = useState(false);
+  const [savingCertifications, setSavingCertifications] = useState(false);
+  const [savingAchievements, setSavingAchievements] = useState(false);
+
+  // Track unsaved changes
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [initialProfile, setInitialProfile] = useState<Partial<User>>({});
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -82,8 +102,89 @@ function ProfileEditContent() {
 
       if (fetchError) {
         setError('Failed to load profile');
+        toast.error('Failed to load profile');
       } else if (userData) {
         setProfile(userData);
+        setInitialProfile(userData); // Store initial state for comparison
+
+        // Parse full_name into title, firstName, lastName
+        if (userData.full_name) {
+          const nameParts = userData.full_name.split(' ');
+          const possibleTitle = nameParts[0];
+
+          if (NAME_TITLES.some(t => t.value === possibleTitle)) {
+            setTitle(possibleTitle);
+            if (nameParts.length >= 3) {
+              setFirstName(nameParts.slice(1, -1).join(' '));
+              setLastName(nameParts[nameParts.length - 1]);
+            } else if (nameParts.length === 2) {
+              setFirstName(nameParts[1]);
+              setLastName('');
+            }
+          } else {
+            // No title prefix - default to Dr.
+            setTitle('Dr.');
+            if (nameParts.length >= 2) {
+              setFirstName(nameParts.slice(0, -1).join(' '));
+              setLastName(nameParts[nameParts.length - 1]);
+            } else {
+              setFirstName(nameParts[0]);
+              setLastName('');
+            }
+          }
+        }
+      }
+
+      // Load educations, certifications and achievements
+      try {
+        const { data: edus } = await supabase
+          .from('user_educations')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        if (edus && edus.length > 0) {
+          setEducation(
+            edus.map((e: any) => ({
+              institution: e.institution || '',
+              degree: e.degree || '',
+              field: e.field || '',
+              year: e.year || '',
+            }))
+          );
+        }
+
+        const { data: certs } = await supabase
+          .from('user_certifications')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        if (certs && certs.length > 0) {
+          setCertifications(
+            certs.map((c: any) => ({
+              name: c.name || '',
+              issuer: c.issuer || '',
+              year: c.year || '',
+              credential: c.credential || '',
+            }))
+          );
+        }
+
+        const { data: achs } = await supabase
+          .from('user_achievements')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        if (achs && achs.length > 0) {
+          setAchievements(
+            achs.map((a: any) => ({
+              title: a.title || '',
+              description: a.description || '',
+              year: a.year || '',
+            }))
+          );
+        }
+      } catch (e) {
+        // ignore, surfaces via UI tabs as empty
       }
 
       setLoading(false);
@@ -91,6 +192,25 @@ function ProfileEditContent() {
 
     loadProfile();
   }, [router]);
+
+  // Track changes to profile
+  useEffect(() => {
+    const hasChanges = JSON.stringify(profile) !== JSON.stringify(initialProfile) || photoFile !== null;
+    setHasUnsavedChanges(hasChanges);
+  }, [profile, photoFile, initialProfile]);
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -158,16 +278,24 @@ function ProfileEditContent() {
         setUploadingPhoto(false);
       }
 
+      // Compute full_name from title + first + last
+      const computedFullName = `${title} ${firstName.trim()} ${lastName.trim()}`.trim();
+
       const { error: updateError } = await supabase
         .from('users')
         .update({
-          full_name: profile.full_name,
+          full_name: computedFullName,
           headline: profile.headline,
           degree: profile.degree,
           specialty: profile.specialty,
           location: profile.location,
           bio: profile.bio,
           profile_photo_url: photoUrl,
+          contact_number: profile.contact_number || null,
+          linkedin_url: profile.linkedin_url,
+          instagram_url: profile.instagram_url,
+          twitter_url: profile.twitter_url,
+          facebook_url: profile.facebook_url,
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id);
@@ -175,6 +303,8 @@ function ProfileEditContent() {
       if (updateError) throw updateError;
 
       setSuccess(true);
+      setHasUnsavedChanges(false); // Reset unsaved changes flag
+      toast.success('Profile updated successfully!');
       setTimeout(() => {
         router.push(`/profile/${user.id}`);
       }, 1500);
@@ -229,6 +359,119 @@ function ProfileEditContent() {
     const updated = [...achievements];
     updated[index] = { ...updated[index], [field]: value };
     setAchievements(updated);
+  };
+
+  const saveEducation = async () => {
+    try {
+      setSavingEducation(true);
+      setError(null);
+      const supabase = createClient();
+      const { data: auth } = await supabase.auth.getUser();
+      const user = auth.user;
+      if (!user) throw new Error('Not authenticated');
+
+      const { error: delError } = await supabase
+        .from('user_educations')
+        .delete()
+        .eq('user_id', user.id);
+      if (delError) throw delError;
+
+      const rows = education
+        .map((e) => ({
+          user_id: user.id,
+          institution: (e.institution || '').trim(),
+          degree: e.degree?.trim() || null,
+          field: e.field?.trim() || null,
+          year: e.year?.trim() || null,
+        }))
+        .filter((e) => e.institution.length > 0);
+
+      if (rows.length > 0) {
+        const { error: insError } = await supabase.from('user_educations').insert(rows);
+        if (insError) throw insError;
+      }
+      toast.success('Education saved');
+    } catch (err: any) {
+      setError(err.message || 'Failed to save education');
+      toast.error(err.message || 'Failed to save education');
+    } finally {
+      setSavingEducation(false);
+    }
+  };
+
+  const saveCertifications = async () => {
+    try {
+      setSavingCertifications(true);
+      setError(null);
+      const supabase = createClient();
+      const { data: auth } = await supabase.auth.getUser();
+      const user = auth.user;
+      if (!user) throw new Error('Not authenticated');
+
+      const { error: delError } = await supabase
+        .from('user_certifications')
+        .delete()
+        .eq('user_id', user.id);
+      if (delError) throw delError;
+
+      const rows = certifications
+        .map((c) => ({
+          user_id: user.id,
+          name: (c.name || '').trim(),
+          issuer: c.issuer?.trim() || null,
+          year: c.year?.trim() || null,
+          credential: c.credential?.trim() || null,
+        }))
+        .filter((c) => c.name.length > 0);
+
+      if (rows.length > 0) {
+        const { error: insError } = await supabase.from('user_certifications').insert(rows);
+        if (insError) throw insError;
+      }
+      toast.success('Certifications saved');
+    } catch (err: any) {
+      setError(err.message || 'Failed to save certifications');
+      toast.error(err.message || 'Failed to save certifications');
+    } finally {
+      setSavingCertifications(false);
+    }
+  };
+
+  const saveAchievements = async () => {
+    try {
+      setSavingAchievements(true);
+      setError(null);
+      const supabase = createClient();
+      const { data: auth } = await supabase.auth.getUser();
+      const user = auth.user;
+      if (!user) throw new Error('Not authenticated');
+
+      const { error: delError } = await supabase
+        .from('user_achievements')
+        .delete()
+        .eq('user_id', user.id);
+      if (delError) throw delError;
+
+      const rows = achievements
+        .map((a) => ({
+          user_id: user.id,
+          title: (a.title || '').trim(),
+          description: a.description?.trim() || null,
+          year: a.year?.trim() || null,
+        }))
+        .filter((a) => a.title.length > 0);
+
+      if (rows.length > 0) {
+        const { error: insError } = await supabase.from('user_achievements').insert(rows);
+        if (insError) throw insError;
+      }
+      toast.success('Achievements saved');
+    } catch (err: any) {
+      setError(err.message || 'Failed to save achievements');
+      toast.error(err.message || 'Failed to save achievements');
+    } finally {
+      setSavingAchievements(false);
+    }
   };
 
   if (loading) {
@@ -332,19 +575,56 @@ function ProfileEditContent() {
                   </div>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                  {/* Full Name */}
-                  <div className="space-y-2">
-                    <Label htmlFor="full_name">Full Name *</Label>
-                    <Input
-                      id="full_name"
-                      value={profile.full_name || ''}
-                      onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
-                      required
-                      disabled={submitting}
-                    />
-                  </div>
+                {/* Name Fields */}
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">Your Name</Label>
+                  <div className="grid gap-4 md:grid-cols-12">
+                    {/* Title Dropdown */}
+                    <div className="space-y-2 md:col-span-1">
+                      <Label htmlFor="title">Title</Label>
+                      <Select value={title} onValueChange={setTitle} disabled={submitting}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Title" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {NAME_TITLES.map((t) => (
+                            <SelectItem key={t.value} value={t.value}>
+                              {t.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
+                    {/* First Name */}
+                    <div className="space-y-2 md:col-span-5">
+                      <Label htmlFor="firstName">First Name *</Label>
+                      <Input
+                        id="firstName"
+                        placeholder="John"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                        disabled={submitting}
+                      />
+                    </div>
+
+                    {/* Last Name */}
+                    <div className="space-y-2 md:col-span-6">
+                      <Label htmlFor="lastName">Last Name *</Label>
+                      <Input
+                        id="lastName"
+                        placeholder="Smith"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                        disabled={submitting}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-3">
                   {/* Degree */}
                   <div className="space-y-2">
                     <Label htmlFor="degree">Degree</Label>
@@ -356,21 +636,7 @@ function ProfileEditContent() {
                       placeholder="e.g., DDS, DMD, BDS"
                     />
                   </div>
-                </div>
 
-                {/* Headline */}
-                <div className="space-y-2">
-                  <Label htmlFor="headline">Professional Headline</Label>
-                  <Input
-                    id="headline"
-                    value={profile.headline || ''}
-                    onChange={(e) => setProfile({ ...profile, headline: e.target.value })}
-                    disabled={submitting}
-                    placeholder="e.g., Cosmetic Dentist specializing in smile makeovers"
-                  />
-                </div>
-
-                <div className="grid gap-6 md:grid-cols-2">
                   {/* Specialty */}
                   <div className="space-y-2">
                     <Label htmlFor="specialty">Specialty</Label>
@@ -407,6 +673,33 @@ function ProfileEditContent() {
                   </div>
                 </div>
 
+                {/* Professional Headline - Dedicated Row */}
+                <div className="space-y-2">
+                  <Label htmlFor="headline">Professional Headline</Label>
+                  <Input
+                    id="headline"
+                    value={profile.headline || ''}
+                    onChange={(e) => setProfile({ ...profile, headline: e.target.value })}
+                    disabled={submitting}
+                    placeholder="e.g., Cosmetic Dentist"
+                  />
+                </div>
+
+                {/* Contact Number */}
+                <div className="space-y-2">
+                  <Label htmlFor="contact_number">Contact Number</Label>
+                  <PhoneInput
+                    id="contact_number"
+                    value={profile.contact_number || ''}
+                    onChange={(value) => setProfile({ ...profile, contact_number: value })}
+                    disabled={submitting}
+                    placeholder="Phone number"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    This will be visible on your profile to help colleagues reach you.
+                  </p>
+                </div>
+
                 {/* Bio */}
                 <div className="space-y-2">
                   <Label htmlFor="bio">Bio</Label>
@@ -418,6 +711,60 @@ function ProfileEditContent() {
                     rows={4}
                     placeholder="Tell us about yourself and your practice..."
                   />
+                </div>
+
+                {/* Social Links */}
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">Social Links</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Connect with colleagues by sharing your professional profiles
+                  </p>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Linkedin className="h-5 w-5 text-[#0077B5]" />
+                      <Input
+                        placeholder="https://linkedin.com/in/yourprofile"
+                        value={profile.linkedin_url || ''}
+                        onChange={(e) => setProfile({ ...profile, linkedin_url: e.target.value })}
+                        disabled={submitting}
+                        className="flex-1"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Twitter className="h-5 w-5 text-[#1DA1F2]" />
+                      <Input
+                        placeholder="https://twitter.com/yourhandle"
+                        value={profile.twitter_url || ''}
+                        onChange={(e) => setProfile({ ...profile, twitter_url: e.target.value })}
+                        disabled={submitting}
+                        className="flex-1"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Instagram className="h-5 w-5 text-[#E4405F]" />
+                      <Input
+                        placeholder="https://instagram.com/yourhandle"
+                        value={profile.instagram_url || ''}
+                        onChange={(e) => setProfile({ ...profile, instagram_url: e.target.value })}
+                        disabled={submitting}
+                        className="flex-1"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Facebook className="h-5 w-5 text-[#1877F2]" />
+                      <Input
+                        placeholder="https://facebook.com/yourprofile"
+                        value={profile.facebook_url || ''}
+                        onChange={(e) => setProfile({ ...profile, facebook_url: e.target.value })}
+                        disabled={submitting}
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Error Message */}
@@ -528,8 +875,8 @@ function ProfileEditContent() {
               </Button>
 
               <div className="flex gap-2 pt-4">
-                <Button onClick={() => console.log('Save education:', education)}>
-                  Save Education
+                <Button onClick={saveEducation} disabled={savingEducation}>
+                  {savingEducation ? 'Saving...' : 'Save Education'}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => router.back()}>
                   Cancel
@@ -610,8 +957,8 @@ function ProfileEditContent() {
               </Button>
 
               <div className="flex gap-2 pt-4">
-                <Button onClick={() => console.log('Save certifications:', certifications)}>
-                  Save Certifications
+                <Button onClick={saveCertifications} disabled={savingCertifications}>
+                  {savingCertifications ? 'Saving...' : 'Save Certifications'}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => router.back()}>
                   Cancel
@@ -686,8 +1033,8 @@ function ProfileEditContent() {
               </Button>
 
               <div className="flex gap-2 pt-4">
-                <Button onClick={() => console.log('Save achievements:', achievements)}>
-                  Save Achievements
+                <Button onClick={saveAchievements} disabled={savingAchievements}>
+                  {savingAchievements ? 'Saving...' : 'Save Achievements'}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => router.back()}>
                   Cancel

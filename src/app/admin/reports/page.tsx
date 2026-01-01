@@ -1,9 +1,5 @@
-import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/shared/supabase/server';
-import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { getAllReports, getReportStats } from '@/lib/backend/actions/report';
@@ -12,20 +8,6 @@ import Image from 'next/image';
 import { ReportActions } from '@/components/admin/report-actions';
 
 export default async function AdminReportsPage() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/auth/login');
-  }
-
-  // Check if user is admin (you can add an is_admin field to users table)
-  // For now, we'll just check if they're authenticated
-  // In production, add proper admin role checking
-
   const [allReports, stats] = await Promise.all([getAllReports(), getReportStats()]);
 
   const pendingReports = allReports.filter((r: any) => r.status === 'pending');
@@ -101,7 +83,7 @@ export default async function AdminReportsPage() {
   );
 
   return (
-    <DashboardLayout currentPath="/admin">
+    <>
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Content Moderation</h1>
         <p className="mt-2 text-muted-foreground">Review and manage reported content</p>
@@ -198,6 +180,6 @@ export default async function AdminReportsPage() {
           )}
         </TabsContent>
       </Tabs>
-    </DashboardLayout>
+    </>
   );
 }

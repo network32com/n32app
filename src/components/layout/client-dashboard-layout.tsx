@@ -193,11 +193,6 @@ export function ClientDashboardLayout({ children, currentPath }: ClientDashboard
               <Bell className="h-5 w-5" />
             </Button>
 
-            {/* Future: Messages */}
-            <Button variant="ghost" size="icon">
-              <MessageSquare className="h-5 w-5" />
-            </Button>
-
             {/* User Menu */}
             {userData && user && (
               <UserMenu
