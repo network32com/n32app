@@ -30,9 +30,9 @@ export function getInitials(name: string): string {
  */
 export function getURL() {
   let url =
+    (typeof window !== 'undefined' && window.location.origin) ||
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.NEXT_PUBLIC_VERCEL_URL ||
-    (typeof window !== 'undefined' && window.location.origin) ||
     'http://localhost:3000/';
 
   // Make sure to include `https://` when not localhost
