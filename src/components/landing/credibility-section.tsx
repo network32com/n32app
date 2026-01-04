@@ -5,7 +5,7 @@ export function CredibilitySection() {
     { value: '1,000+', label: 'Dental Professionals' },
     { value: '5,000+', label: 'Clinical Cases Shared' },
     { value: '10,000+', label: 'Forum Discussions' },
-    { value: '50+', label: 'Specialties Represented' },
+    { value: '50+', label: 'Specialities Represented' },
   ];
 
   const trustFactors = [

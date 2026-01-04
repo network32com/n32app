@@ -7,7 +7,7 @@ export async function searchUsers(query: string) {
 
   const { data, error } = await supabase
     .from('users')
-    .select('id, full_name, headline, specialty, location, profile_photo_url, degree')
+    .select('id, full_name, headline, speciality, location, profile_photo_url, degree')
     .or(
       `full_name.ilike.%${query}%,headline.ilike.%${query}%,location.ilike.%${query}%,degree.ilike.%${query}%`
     )
@@ -32,7 +32,7 @@ export async function searchCases(query: string) {
         id,
         full_name,
         profile_photo_url,
-        specialty,
+        speciality,
         degree
       )
     `
@@ -90,7 +90,7 @@ export async function filterCasesByProcedure(procedureType: string) {
         id,
         full_name,
         profile_photo_url,
-        specialty,
+        speciality,
         degree
       )
     `
@@ -118,7 +118,7 @@ export async function filterCasesByTag(tag: string) {
         id,
         full_name,
         profile_photo_url,
-        specialty,
+        speciality,
         degree
       )
     `
@@ -134,13 +134,13 @@ export async function filterCasesByTag(tag: string) {
   return data;
 }
 
-export async function filterUsersBySpecialty(specialty: string) {
+export async function filterUsersBySpeciality(speciality: string) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from('users')
-    .select('id, full_name, headline, specialty, location, profile_photo_url, degree')
-    .eq('specialty', specialty)
+    .select('id, full_name, headline, speciality, location, profile_photo_url, degree')
+    .eq('speciality', speciality)
     .limit(50);
 
   if (error) {

@@ -42,9 +42,9 @@ export function ProfessionalCard({ professionalData }: ProfessionalCardProps) {
             {professionalData.degree && (
               <p className="text-sm text-muted-foreground">{professionalData.degree}</p>
             )}
-            {professionalData.specialty && (
+            {professionalData.speciality && (
               <Badge variant="outline" className="mt-1 text-xs">
-                {professionalData.specialty.replace(/_/g, ' ')}
+                {professionalData.speciality.replace(/_/g, ' ')}
               </Badge>
             )}
           </div>

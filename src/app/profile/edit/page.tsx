@@ -18,8 +18,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { SPECIALTIES, NAME_TITLES } from '@/lib/shared/constants';
-import type { User, Specialty } from '@/lib/shared/types/database.types';
+import { SPECIALITIES, NAME_TITLES } from '@/lib/shared/constants';
+import type { User, Speciality } from '@/lib/shared/types/database.types';
 import { Upload, X, User as UserIcon, GraduationCap, Award, Plus, Trash2, Linkedin, Instagram, Twitter, Facebook } from 'lucide-react';
 import { toast } from 'sonner';
 import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
@@ -40,7 +40,7 @@ function ProfileEditContent() {
     full_name: '',
     headline: '',
     degree: '',
-    specialty: undefined,
+    speciality: undefined,
     location: '',
     bio: '',
     profile_photo_url: '',
@@ -287,7 +287,7 @@ function ProfileEditContent() {
           full_name: computedFullName,
           headline: profile.headline,
           degree: profile.degree,
-          specialty: profile.specialty,
+          speciality: profile.speciality,
           location: profile.location,
           bio: profile.bio,
           profile_photo_url: photoUrl,
@@ -637,23 +637,23 @@ function ProfileEditContent() {
                     />
                   </div>
 
-                  {/* Specialty */}
+                  {/* Speciality */}
                   <div className="space-y-2">
-                    <Label htmlFor="specialty">Specialty</Label>
+                    <Label htmlFor="speciality">Speciality</Label>
                     <Select
-                      value={profile.specialty || ''}
+                      value={profile.speciality || ''}
                       onValueChange={(value) =>
-                        setProfile({ ...profile, specialty: value as Specialty })
+                        setProfile({ ...profile, speciality: value as Speciality })
                       }
                       disabled={submitting}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select specialty" />
+                        <SelectValue placeholder="Select speciality" />
                       </SelectTrigger>
                       <SelectContent>
-                        {SPECIALTIES.map((specialty) => (
-                          <SelectItem key={specialty.value} value={specialty.value}>
-                            {specialty.label}
+                        {SPECIALITIES.map((speciality) => (
+                          <SelectItem key={speciality.value} value={speciality.value}>
+                            {speciality.label}
                           </SelectItem>
                         ))}
                       </SelectContent>

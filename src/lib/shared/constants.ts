@@ -12,7 +12,7 @@ export const PROCEDURE_TYPES = [
     { value: 'other', label: 'Other' },
 ] as const;
 
-export const SPECIALTIES = [
+export const SPECIALITIES = [
     { value: 'general_dentistry', label: 'General Dentistry' },
     { value: 'orthodontics', label: 'Orthodontics' },
     { value: 'endodontics', label: 'Endodontics' },

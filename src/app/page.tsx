@@ -179,7 +179,7 @@ export default async function Home() {
               <h3 className="mb-2 text-xl font-semibold text-center">Community Forums</h3>
               <p className="text-muted-foreground text-center">
                 Discuss techniques, troubleshoot challenges, and share insights with peers
-                in specialty-specific forums.
+                in speciality-specific forums.
               </p>
             </div>
 
@@ -194,7 +194,7 @@ export default async function Home() {
               <h3 className="mb-2 text-xl font-semibold text-center">Build Your Network</h3>
               <p className="text-muted-foreground text-center">
                 Follow colleagues, discover peers in your area, and expand your professional
-                circle across specialties.
+                circle across specialities.
               </p>
             </div>
 

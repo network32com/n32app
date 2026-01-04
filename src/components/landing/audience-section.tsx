@@ -11,7 +11,7 @@ export function AudienceSection() {
     {
       icon: GraduationCap,
       title: 'Specialists',
-      description: 'Showcase complex cases, connect with referring doctors, and build your reputation in your specialty.',
+      description: 'Showcase complex cases, connect with referring doctors, and build your reputation in your speciality.',
       color: 'purple',
     },
     {

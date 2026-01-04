@@ -26,7 +26,7 @@ export type ProcedureType =
   | 'fmr'
   | 'other';
 
-export type Specialty =
+export type Speciality =
   | 'general_dentistry'
   | 'orthodontics'
   | 'endodontics'
@@ -44,7 +44,7 @@ export interface User {
   full_name: string;
   headline?: string;
   degree?: string;
-  specialty?: Specialty;
+  speciality?: Speciality;
   location?: string;
   bio?: string;
   profile_photo_url?: string;

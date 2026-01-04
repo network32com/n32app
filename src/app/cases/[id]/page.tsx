@@ -298,9 +298,9 @@ export default async function CaseDetailPage({ params }: CaseDetailPageProps) {
                 <p className="text-sm text-muted-foreground">{caseData.users.headline}</p>
               )}
 
-              {caseData.users?.specialty && (
+              {caseData.users?.speciality && (
                 <Badge variant="secondary" className="w-fit">
-                  {caseData.users.specialty.replace(/_/g, ' ')}
+                  {caseData.users.speciality.replace(/_/g, ' ')}
                 </Badge>
               )}
 

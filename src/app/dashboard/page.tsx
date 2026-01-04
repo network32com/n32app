@@ -45,7 +45,7 @@ export default async function DashboardPage() {
     userData.full_name,
     userData.headline,
     userData.degree,
-    userData.specialty,
+    userData.speciality,
     userData.location,
     userData.bio,
     userData.profile_photo_url,

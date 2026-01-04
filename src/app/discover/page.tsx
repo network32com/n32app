@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import Link from 'next/link';
 import { Search, Users, FileText, Building2, TrendingUp, MapPin, Filter } from 'lucide-react';
-import { SPECIALTIES, PROCEDURE_TYPES } from '@/lib/shared/constants';
+import { SPECIALITIES, PROCEDURE_TYPES } from '@/lib/shared/constants';
 import Image from 'next/image';
 
 export default function DiscoverPage() {
@@ -29,7 +29,7 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(true);
 
   // Filter states
-  const [specialtyFilter, setSpecialtyFilter] = useState('all');
+  const [specialityFilter, setSpecialityFilter] = useState('all');
   const [locationFilter, setLocationFilter] = useState('');
   const [procedureFilter, setProcedureFilter] = useState('all');
 
@@ -37,12 +37,12 @@ export default function DiscoverPage() {
   const [professionals, setProfessionals] = useState<any[]>([]);
   const [cases, setCases] = useState<any[]>([]);
   const [clinics, setClinics] = useState<any[]>([]);
-  const [trendingSpecialties, setTrendingSpecialties] = useState<any[]>([]);
+  const [trendingSpecialities, setTrendingSpecialities] = useState<any[]>([]);
   const [topProfessionals, setTopProfessionals] = useState<any[]>([]);
 
   useEffect(() => {
     loadData();
-  }, [activeTab, specialtyFilter, locationFilter, procedureFilter, searchQuery]);
+  }, [activeTab, specialityFilter, locationFilter, procedureFilter, searchQuery]);
 
   const loadData = async () => {
     setLoading(true);
@@ -52,12 +52,12 @@ export default function DiscoverPage() {
       if (activeTab === 'professionals') {
         let query = supabase
           .from('users')
-          .select('id, full_name, headline, specialty, location, profile_photo_url, degree')
+          .select('id, full_name, headline, speciality, location, profile_photo_url, degree')
           .order('created_at', { ascending: false })
           .limit(12);
 
-        if (specialtyFilter && specialtyFilter !== 'all') {
-          query = query.eq('specialty', specialtyFilter);
+        if (specialityFilter && specialityFilter !== 'all') {
+          query = query.eq('speciality', specialityFilter);
         }
 
         if (locationFilter) {
@@ -132,7 +132,7 @@ export default function DiscoverPage() {
       // Load trending data
       const { data: topUsers } = await supabase
         .from('users')
-        .select('id, full_name, specialty, profile_photo_url, degree')
+        .select('id, full_name, speciality, profile_photo_url, degree')
         .limit(5);
       setTopProfessionals(topUsers || []);
     } catch (error) {
@@ -203,15 +203,15 @@ export default function DiscoverPage() {
               <div className="flex flex-wrap gap-2">
                 {activeTab === 'professionals' && (
                   <>
-                    <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
+                    <Select value={specialityFilter} onValueChange={setSpecialityFilter}>
                       <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="All Specialties" />
+                        <SelectValue placeholder="All Specialities" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Specialties</SelectItem>
-                        {SPECIALTIES.map((specialty) => (
-                          <SelectItem key={specialty.value} value={specialty.value}>
-                            {specialty.label}
+                        <SelectItem value="all">All Specialities</SelectItem>
+                        {SPECIALITIES.map((speciality) => (
+                          <SelectItem key={speciality.value} value={speciality.value}>
+                            {speciality.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -283,9 +283,9 @@ export default function DiscoverPage() {
                           {professional.degree && (
                             <p className="text-sm text-muted-foreground">{professional.degree}</p>
                           )}
-                          {professional.specialty && (
+                          {professional.speciality && (
                             <Badge variant="outline" className="mt-2">
-                              {professional.specialty.replace(/_/g, ' ')}
+                              {professional.speciality.replace(/_/g, ' ')}
                             </Badge>
                           )}
                         </div>
@@ -410,27 +410,27 @@ export default function DiscoverPage() {
         <h2 className="text-2xl font-semibold">Trending & Recommendations</h2>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Trending Specialties */}
+          {/* Trending Specialities */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-blue-600" />
-                Trending Specialties
+                Trending Specialities
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {SPECIALTIES.slice(0, 5).map((specialty) => (
+                {SPECIALITIES.slice(0, 5).map((speciality) => (
                   <Badge
-                    key={specialty.value}
+                    key={speciality.value}
                     variant="secondary"
                     className="cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-950"
                     onClick={() => {
                       setActiveTab('professionals');
-                      setSpecialtyFilter(specialty.value);
+                      setSpecialityFilter(speciality.value);
                     }}
                   >
-                    {specialty.label}
+                    {speciality.label}
                   </Badge>
                 ))}
               </div>

@@ -12,7 +12,7 @@ export async function getForumThreads(
 
   let query = supabase
     .from('forum_threads')
-    .select('*, users(id, full_name, profile_photo_url, degree, specialty)')
+    .select('*, users(id, full_name, profile_photo_url, degree, speciality)')
     .order(sortBy === 'latest' ? 'created_at' : 'last_activity_at', { ascending: false });
 
   if (category) {
@@ -34,7 +34,7 @@ export async function getForumThread(id: string): Promise<ForumThread> {
 
   const { data, error } = await supabase
     .from('forum_threads')
-    .select('*, users(id, full_name, profile_photo_url, degree, specialty, headline, location)')
+    .select('*, users(id, full_name, profile_photo_url, degree, speciality, headline, location)')
     .eq('id', id)
     .single();
 
@@ -93,7 +93,7 @@ export async function createForumThread(data: {
       ...data,
       image_urls: data.image_urls || [],
     })
-    .select('*, users(id, full_name, profile_photo_url, degree, specialty)')
+    .select('*, users(id, full_name, profile_photo_url, degree, speciality)')
     .single();
 
   if (error) throw error;
@@ -182,7 +182,7 @@ export async function updateForumThread(
     })
     .eq('id', threadId)
     .eq('author_id', userId)
-    .select('*, users(id, full_name, profile_photo_url, degree, specialty)')
+    .select('*, users(id, full_name, profile_photo_url, degree, speciality)')
     .single();
 
   if (error) throw error;
