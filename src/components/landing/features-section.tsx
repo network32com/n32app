@@ -11,14 +11,14 @@ export function FeaturesSection() {
     {
       icon: MessageSquare,
       title: 'Professional Forums',
-      description: 'Ask questions, share insights, and engage in meaningful discussions with peers across specialties.',
+      description: 'Ask questions, share insights, and engage in meaningful discussions with peers across specialities.',
       benefits: ['Topic-based discussions', 'Expert answers', 'Community moderation'],
     },
     {
       icon: Users,
       title: 'Network Building',
       description: 'Follow colleagues, discover specialists, and build relationships that advance your career.',
-      benefits: ['Professional profiles', 'Specialty filtering', 'Connection recommendations'],
+      benefits: ['Professional profiles', 'Speciality filtering', 'Connection recommendations'],
     },
     {
       icon: Building2,
@@ -36,7 +36,7 @@ export function FeaturesSection() {
       icon: TrendingUp,
       title: 'Personalized Feed',
       description: 'See content that matters to you—cases from your network, trending procedures, and relevant discussions.',
-      benefits: ['Smart filtering', 'Specialty focus', 'Activity updates'],
+      benefits: ['Smart filtering', 'Speciality focus', 'Activity updates'],
     },
   ];
 

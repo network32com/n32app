@@ -117,9 +117,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                               {professional.degree && (
                                 <p className="text-sm text-muted-foreground">{professional.degree}</p>
                               )}
-                              {professional.specialty && (
+                              {professional.speciality && (
                                 <Badge variant="outline" className="mt-1">
-                                  {professional.specialty.replace('_', ' ')}
+                                  {professional.speciality.replace('_', ' ')}
                                 </Badge>
                               )}
                             </div>
@@ -231,9 +231,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                           {professional.degree && (
                             <p className="text-sm text-muted-foreground">{professional.degree}</p>
                           )}
-                          {professional.specialty && (
+                          {professional.speciality && (
                             <Badge variant="outline" className="mt-2">
-                              {professional.specialty.replace('_', ' ')}
+                              {professional.speciality.replace('_', ' ')}
                             </Badge>
                           )}
                         </div>

@@ -39,7 +39,7 @@ export async function getCase(caseId: string) {
         id,
         full_name,
         profile_photo_url,
-        specialty,
+        speciality,
         degree
       )
     `)
@@ -80,7 +80,7 @@ export async function getAllCases(limit: number = 20, offset: number = 0) {
         id,
         full_name,
         profile_photo_url,
-        specialty,
+        speciality,
         degree
       )
     `)
@@ -272,7 +272,7 @@ export async function getSavedCases(userId: string) {
           id,
           full_name,
           profile_photo_url,
-          specialty,
+          speciality,
           degree
         )
       )

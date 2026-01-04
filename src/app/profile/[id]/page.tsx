@@ -17,7 +17,7 @@ import {
   getUserCertifications,
   getUserAchievements,
 } from '@/lib/backend/actions/profile';
-import { SPECIALTIES } from '@/lib/shared/constants';
+import { SPECIALITIES } from '@/lib/shared/constants';
 import { FollowButton } from '@/components/profile/follow-button';
 import { ShareProfileButton } from '@/components/profile/share-profile-button';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
@@ -48,12 +48,12 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
 
   try {
     const profile = await getUserProfile(id);
-    const specialtyLabel = SPECIALTIES.find(s => s.value === profile.specialty)?.label;
+    const specialityLabel = SPECIALITIES.find(s => s.value === profile.speciality)?.label;
 
     const title = `${profile.full_name} | Network32`;
     const description = profile.headline
-      ? `${profile.headline} - ${specialtyLabel || profile.role} on Network32`
-      : `${specialtyLabel || profile.role.replace(/_/g, ' ')} on Network32 - The Professional Network for Dentists`;
+      ? `${profile.headline} - ${specialityLabel || profile.role} on Network32`
+      : `${specialityLabel || profile.role.replace(/_/g, ' ')} on Network32 - The Professional Network for Dentists`;
 
     return {
       title,
@@ -162,9 +162,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     <p className="mt-2 text-muted-foreground">{profile.headline}</p>
                   )}
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {profile.specialty && (
+                    {profile.speciality && (
                       <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                        {SPECIALTIES.find((s) => s.value === profile.specialty)?.label ?? profile.specialty.replace(/_/g, ' ')}
+                        {SPECIALITIES.find((s) => s.value === profile.speciality)?.label ?? profile.speciality.replace(/_/g, ' ')}
                       </Badge>
                     )}
                     <Badge variant="secondary">{profile.role.replace(/_/g, ' ')}</Badge>
@@ -344,15 +344,15 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     <p className="mt-1 text-sm text-muted-foreground">{profile.degree}</p>
                   </div>
                 )}
-                {profile.specialty && (
+                {profile.speciality && (
                   <div>
-                    <p className="text-sm font-medium">Specialty</p>
+                    <p className="text-sm font-medium">Speciality</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {SPECIALTIES.find((s) => s.value === profile.specialty)?.label ?? profile.specialty.replace(/_/g, ' ')}
+                      {SPECIALITIES.find((s) => s.value === profile.speciality)?.label ?? profile.speciality.replace(/_/g, ' ')}
                     </p>
                   </div>
                 )}
-                {!profile.degree && !profile.specialty && (
+                {!profile.degree && !profile.speciality && (
                   <p className="text-sm text-muted-foreground">No education information available</p>
                 )}
               </CardContent>

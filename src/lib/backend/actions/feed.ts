@@ -32,7 +32,7 @@ export async function getFeedItems(
   if (filter === 'all' || filter === 'cases') {
     let casesQuery = supabase
       .from('cases')
-      .select('*, users(id, full_name, profile_photo_url, degree, specialty, location)')
+      .select('*, users(id, full_name, profile_photo_url, degree, speciality, location)')
       .order('created_at', { ascending: false });
 
     if (sort === 'my_network' && followingIds.length > 0) {
@@ -56,7 +56,7 @@ export async function getFeedItems(
   if (filter === 'all' || filter === 'threads') {
     let threadsQuery = supabase
       .from('forum_threads')
-      .select('*, users(id, full_name, profile_photo_url, degree, specialty)')
+      .select('*, users(id, full_name, profile_photo_url, degree, speciality)')
       .order('created_at', { ascending: false });
 
     if (sort === 'my_network' && followingIds.length > 0) {
@@ -137,7 +137,7 @@ export async function getSuggestedProfessionals(userId: string, limit: number = 
 
   const { data: professionals } = await supabase
     .from('users')
-    .select('id, full_name, profile_photo_url, degree, specialty, location, headline')
+    .select('id, full_name, profile_photo_url, degree, speciality, location, headline')
     .neq('id', userId)
     .not('id', 'in', `(${followingIds.join(',')})`)
     .limit(limit);

@@ -21,7 +21,7 @@ import {
 import Link from 'next/link';
 import { Users, UserMinus, MapPin, GraduationCap } from 'lucide-react';
 import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
-import { SPECIALTIES } from '@/lib/shared/constants';
+import { SPECIALITIES } from '@/lib/shared/constants';
 import { toast } from 'sonner';
 
 interface FollowedUser {
@@ -29,7 +29,7 @@ interface FollowedUser {
     full_name: string;
     profile_photo_url?: string;
     degree?: string;
-    specialty?: string;
+    speciality?: string;
     location?: string;
     headline?: string;
 }
@@ -81,7 +81,7 @@ export default function FollowingPage() {
             const followingIds = follows.map((f) => f.following_id);
             const { data: users, error: usersError } = await supabase
                 .from('users')
-                .select('id, full_name, profile_photo_url, degree, specialty, location, headline')
+                .select('id, full_name, profile_photo_url, degree, speciality, location, headline')
                 .in('id', followingIds);
 
             if (usersError) {
@@ -141,9 +141,9 @@ export default function FollowingPage() {
             .slice(0, 2);
     };
 
-    const getSpecialtyLabel = (value: string) => {
-        const specialty = SPECIALTIES.find((s) => s.value === value);
-        return specialty?.label || value;
+    const getSpecialityLabel = (value: string) => {
+        const speciality = SPECIALITIES.find((s) => s.value === value);
+        return speciality?.label || value;
     };
 
     return (
@@ -239,9 +239,9 @@ export default function FollowingPage() {
                                                     {user.degree}
                                                 </Badge>
                                             )}
-                                            {user.specialty && (
+                                            {user.speciality && (
                                                 <Badge variant="outline" className="text-xs">
-                                                    {getSpecialtyLabel(user.specialty)}
+                                                    {getSpecialityLabel(user.speciality)}
                                                 </Badge>
                                             )}
                                         </div>

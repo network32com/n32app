@@ -11,7 +11,7 @@ import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layo
 import { ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { SPECIALTIES } from '@/lib/shared/constants';
+import { SPECIALITIES } from '@/lib/shared/constants';
 
 export default function FeedSettingsPage() {
   const router = useRouter();
@@ -26,7 +26,7 @@ export default function FeedSettingsPage() {
   const [showClinics, setShowClinics] = useState(true);
   const [showProfessionals, setShowProfessionals] = useState(true);
   const [showNetworkOnly, setShowNetworkOnly] = useState(false);
-  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
+  const [selectedSpecialities, setSelectedSpecialities] = useState<string[]>([]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -58,7 +58,7 @@ export default function FeedSettingsPage() {
       setShowClinics(parsed.showClinics ?? true);
       setShowProfessionals(parsed.showProfessionals ?? true);
       setShowNetworkOnly(parsed.showNetworkOnly ?? false);
-      setSelectedSpecialties(parsed.selectedSpecialties ?? []);
+      setSelectedSpecialities(parsed.selectedSpecialities ?? []);
     }
     setLoading(false);
   };
@@ -76,7 +76,7 @@ export default function FeedSettingsPage() {
         showClinics,
         showProfessionals,
         showNetworkOnly,
-        selectedSpecialties,
+        selectedSpecialities,
       };
 
       // In a real implementation, save to database
@@ -92,11 +92,11 @@ export default function FeedSettingsPage() {
     }
   };
 
-  const toggleSpecialty = (specialty: string) => {
-    if (selectedSpecialties.includes(specialty)) {
-      setSelectedSpecialties(selectedSpecialties.filter((s) => s !== specialty));
+  const toggleSpeciality = (speciality: string) => {
+    if (selectedSpecialities.includes(speciality)) {
+      setSelectedSpecialities(selectedSpecialities.filter((s) => s !== speciality));
     } else {
-      setSelectedSpecialties([...selectedSpecialties, specialty]);
+      setSelectedSpecialities([...selectedSpecialities, speciality]);
     }
   };
 
@@ -215,30 +215,30 @@ export default function FeedSettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Specialty Focus */}
+          {/* Speciality Focus */}
           <Card>
             <CardHeader>
-              <CardTitle>Specialty Focus</CardTitle>
+              <CardTitle>Speciality Focus</CardTitle>
               <CardDescription>
-                Select specialties to prioritize in your feed (optional)
+                Select specialities to prioritize in your feed (optional)
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {SPECIALTIES.map((specialty) => (
+                {SPECIALITIES.map((speciality) => (
                   <Badge
-                    key={specialty.value}
-                    variant={selectedSpecialties.includes(specialty.value) ? 'default' : 'outline'}
+                    key={speciality.value}
+                    variant={selectedSpecialities.includes(speciality.value) ? 'default' : 'outline'}
                     className="cursor-pointer px-3 py-1"
-                    onClick={() => toggleSpecialty(specialty.value)}
+                    onClick={() => toggleSpeciality(speciality.value)}
                   >
-                    {specialty.label}
+                    {speciality.label}
                   </Badge>
                 ))}
               </div>
-              {selectedSpecialties.length > 0 && (
+              {selectedSpecialities.length > 0 && (
                 <p className="mt-3 text-sm text-muted-foreground">
-                  {selectedSpecialties.length} {selectedSpecialties.length === 1 ? 'specialty' : 'specialties'} selected
+                  {selectedSpecialities.length} {selectedSpecialities.length === 1 ? 'speciality' : 'specialities'} selected
                 </p>
               )}
             </CardContent>

@@ -18,7 +18,7 @@ import {
 import Link from 'next/link';
 import { Eye, Bookmark, Plus, Search, Clock, MapPin, X } from 'lucide-react';
 import Image from 'next/image';
-import { PROCEDURE_TYPES, SPECIALTIES } from '@/lib/shared/constants';
+import { PROCEDURE_TYPES, SPECIALITIES } from '@/lib/shared/constants';
 import { ClientDashboardLayout } from '@/components/layout/client-dashboard-layout';
 import { ShareCaseButton } from '@/components/cases/share-button';
 import { formatDistanceToNow } from 'date-fns';
@@ -30,13 +30,13 @@ export default function CasesPage() {
   const [cases, setCases] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [procedureFilter, setProcedureFilter] = useState('all');
-  const [specialtyFilter, setSpecialtyFilter] = useState('all');
+  const [specialityFilter, setSpecialityFilter] = useState('all');
   const [locationFilter, setLocationFilter] = useState('');
   const [hoveredCase, setHoveredCase] = useState<string | null>(null);
 
   useEffect(() => {
     loadCases();
-  }, [procedureFilter, specialtyFilter, locationFilter, searchQuery]);
+  }, [procedureFilter, specialityFilter, locationFilter, searchQuery]);
 
   const loadCases = async () => {
     setLoading(true);
@@ -68,19 +68,19 @@ export default function CasesPage() {
           data.map(async (caseItem) => {
             const { data: author } = await supabase
               .from('users')
-              .select('id, full_name, profile_photo_url, degree, specialty, location')
+              .select('id, full_name, profile_photo_url, degree, speciality, location')
               .eq('id', caseItem.author_id)
               .single();
             return { ...caseItem, author };
           })
         );
 
-        // Apply specialty and location filters
+        // Apply speciality and location filters
         let filteredCases = casesWithAuthors;
 
-        if (specialtyFilter && specialtyFilter !== 'all') {
+        if (specialityFilter && specialityFilter !== 'all') {
           filteredCases = filteredCases.filter(
-            (c) => c.author?.specialty === specialtyFilter
+            (c) => c.author?.speciality === specialityFilter
           );
         }
 
@@ -214,15 +214,15 @@ export default function CasesPage() {
               </SelectContent>
             </Select>
 
-            <Select value={specialtyFilter} onValueChange={setSpecialtyFilter} aria-label="Filter by specialty">
+            <Select value={specialityFilter} onValueChange={setSpecialityFilter} aria-label="Filter by speciality">
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Specialty" />
+                <SelectValue placeholder="Speciality" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Specialties</SelectItem>
-                {SPECIALTIES.map((specialty) => (
-                  <SelectItem key={specialty.value} value={specialty.value}>
-                    {specialty.label}
+                <SelectItem value="all">All Specialities</SelectItem>
+                {SPECIALITIES.map((speciality) => (
+                  <SelectItem key={speciality.value} value={speciality.value}>
+                    {speciality.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -238,14 +238,14 @@ export default function CasesPage() {
             />
 
             {(procedureFilter !== 'all' ||
-              specialtyFilter !== 'all' ||
+              specialityFilter !== 'all' ||
               locationFilter ||
               searchQuery) && (
                 <Button
                   variant="ghost"
                   onClick={() => {
                     setProcedureFilter('all');
-                    setSpecialtyFilter('all');
+                    setSpecialityFilter('all');
                     setLocationFilter('');
                     setSearchQuery('');
                   }}
@@ -257,7 +257,7 @@ export default function CasesPage() {
           </div>
 
           {/* Active Filter Pills */}
-          {(procedureFilter !== 'all' || specialtyFilter !== 'all' || locationFilter || searchQuery) && (
+          {(procedureFilter !== 'all' || specialityFilter !== 'all' || locationFilter || searchQuery) && (
             <div className="flex flex-wrap gap-2">
               {searchQuery && (
                 <Badge variant="secondary" className="gap-1">
@@ -279,13 +279,13 @@ export default function CasesPage() {
                   />
                 </Badge>
               )}
-              {specialtyFilter !== 'all' && (
+              {specialityFilter !== 'all' && (
                 <Badge variant="secondary" className="gap-1">
-                  {SPECIALTIES.find(s => s.value === specialtyFilter)?.label}
+                  {SPECIALITIES.find(s => s.value === specialityFilter)?.label}
                   <X
                     className="h-3 w-3 cursor-pointer hover:text-destructive"
-                    onClick={() => setSpecialtyFilter('all')}
-                    aria-label="Clear specialty filter"
+                    onClick={() => setSpecialityFilter('all')}
+                    aria-label="Clear speciality filter"
                   />
                 </Badge>
               )}
@@ -311,7 +311,7 @@ export default function CasesPage() {
         <Card>
           <CardContent className="py-12 text-center">
             <p className="mb-4 text-muted-foreground">
-              {searchQuery || procedureFilter !== 'all' || specialtyFilter !== 'all' || locationFilter
+              {searchQuery || procedureFilter !== 'all' || specialityFilter !== 'all' || locationFilter
                 ? 'No cases found matching your filters'
                 : 'No cases have been shared yet'}
             </p>
