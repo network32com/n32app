@@ -2,7 +2,13 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/shared/supabase/server';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Metadata } from 'next';
 import { HeroSection } from '@/components/landing/hero-section';
+
+export const metadata: Metadata = {
+  title: "Clinical Excellence for Dental Professionals",
+  description: "Join the most active clinical network for dentists. Share cases, discuss techniques, and grow your professional presence.",
+};
 import { StorySection } from '@/components/landing/story-section';
 import { AudienceSection } from '@/components/landing/audience-section';
 import { FeaturesSection } from '@/components/landing/features-section';

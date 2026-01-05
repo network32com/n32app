@@ -16,8 +16,40 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Network32 - Professional Dental Network",
-  description: "Connect, share, and learn with dental professionals worldwide",
+  title: {
+    default: "Network32 - Professional Dental Network",
+    template: "%s | Network32",
+  },
+  description: "Connect, share, and learn with dental professionals worldwide. The exclusive community for clinical excellence, case sharing, and practice growth.",
+  keywords: ["dentistry", "dental network", "clinical cases", "dental education", "dentist community", "practice growth"],
+  authors: [{ name: "Network32 Team" }],
+  creator: "Network32",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://network32.com",
+    title: "Network32 - Professional Dental Network",
+    description: "Connect, share, and learn with dental professionals worldwide.",
+    siteName: "Network32",
+    images: [
+      {
+        url: "/logo.svg",
+        width: 1200,
+        height: 630,
+        alt: "Network32 Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Network32 - Professional Dental Network",
+    description: "Connect, share, and learn with dental professionals worldwide.",
+    images: ["/logo.svg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
