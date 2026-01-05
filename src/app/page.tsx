@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/shared/supabase/server';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default async function Home() {
   const supabase = await createClient();
@@ -19,7 +20,16 @@ export default async function Home() {
       {/* Header */}
       <header className="border-b border-border bg-card">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <h1 className="text-xl font-bold text-primary">Network32</h1>
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/logo.svg"
+              alt="Network32 Logo"
+              width={32}
+              height={32}
+              className="h-8 w-8 transition-transform duration-500 hover:animate-slow-spin"
+            />
+            <span className="text-xl font-bold text-primary">Network32</span>
+          </Link>
           <div className="flex items-center gap-4">
             <Link href="/auth/login">
               <Button variant="ghost">Log In</Button>
@@ -298,10 +308,20 @@ export default async function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>&copy; 2025 Network32. All rights reserved.</p>
-          <p className="mt-2">A professional network built by dentists, for dentists</p>
+      <footer className="border-t border-border bg-card py-12">
+        <div className="container mx-auto px-4 text-center">
+          <div className="mb-4 flex items-center justify-center gap-2">
+            <Image
+              src="/logo.svg"
+              alt="Network32 Logo"
+              width={24}
+              height={24}
+              className="h-6 w-6 transition-transform duration-500 hover:animate-slow-spin"
+            />
+            <span className="text-lg font-bold text-primary">Network32</span>
+          </div>
+          <p className="text-sm text-muted-foreground">&copy; 2026 Network32. All rights reserved.</p>
+          <p className="mt-2 text-sm text-muted-foreground">A professional network built by dentists, for dentists</p>
         </div>
       </footer>
     </div>

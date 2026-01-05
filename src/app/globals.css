@@ -52,6 +52,18 @@
   --font-mono: JetBrains Mono, monospace;
 
   --radius: 0.375rem;
+
+  --animate-slow-spin: slow-spin 8s linear infinite;
+
+  @keyframes slow-spin {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
 }
 
 /* =========================
