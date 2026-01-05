@@ -52,25 +52,25 @@ export default function SignUpPage() {
     }
   };
 
-  //   const handleGoogleSignUp = async () => {
-  //     setLoading(true);
-  //     setError(null);
+  const handleGoogleSignUp = async () => {
+    setLoading(true);
+    setError(null);
 
-  //     try {
-  //       const supabase = createClient();
-  //       const { error } = await supabase.auth.signInWithOAuth({
-  //         provider: 'google',
-  //         options: {
-  //           redirectTo: `${getURL()}auth/callback`,
-  //         },
-  //       });
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${getURL()}auth/callback`,
+        },
+      });
 
-  //       if (error) throw error;
-  //     } catch (err: any) {
-  //       setError(err.message || 'An error occurred during Google sign up');
-  //       setLoading(false);
-  //     }
-  //   };
+      if (error) throw error;
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during Google sign up');
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -82,7 +82,6 @@ export default function SignUpPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* 
           <Button
             type="button"
             variant="outline"
@@ -119,7 +118,6 @@ export default function SignUpPage() {
               <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
             </div>
           </div>
-          */}
 
           <form onSubmit={handleSignUp} className="space-y-4">
             <div className="space-y-2">
