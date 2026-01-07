@@ -102,6 +102,25 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     redirect('/dashboard');
   }
 
+  // Block non-admin users from viewing admin profiles
+  if ((profile.role as string) === 'admin') {
+    // Check if current user is also an admin
+    if (currentUser) {
+      const { data: currentUserData } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', currentUser.id)
+        .single();
+
+      if (!currentUserData || currentUserData.role !== 'admin') {
+        redirect('/dashboard');
+      }
+    } else {
+      // Not logged in, can't view admin profile
+      redirect('/dashboard');
+    }
+  }
+
   const [
     followerCount,
     followingCount,

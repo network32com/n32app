@@ -53,6 +53,7 @@ export default function DiscoverPage() {
         let query = supabase
           .from('users')
           .select('id, full_name, headline, speciality, location, profile_photo_url, degree')
+          .neq('role', 'admin')
           .order('created_at', { ascending: false })
           .limit(12);
 
@@ -94,7 +95,7 @@ export default function DiscoverPage() {
         if (error) {
           console.error('Error loading cases:', error);
         }
-        
+
         // Fetch author details separately for each case
         if (data) {
           const casesWithAuthors = await Promise.all(
@@ -133,6 +134,7 @@ export default function DiscoverPage() {
       const { data: topUsers } = await supabase
         .from('users')
         .select('id, full_name, speciality, profile_photo_url, degree')
+        .neq('role', 'admin')
         .limit(5);
       setTopProfessionals(topUsers || []);
     } catch (error) {

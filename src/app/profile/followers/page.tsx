@@ -69,7 +69,8 @@ export default function FollowersPage() {
             const { data: users, error: usersError } = await supabase
                 .from('users')
                 .select('id, full_name, profile_photo_url, degree, speciality, location, headline')
-                .in('id', followerIds);
+                .in('id', followerIds)
+                .neq('role', 'admin');
 
             if (usersError) {
                 console.error('Error loading users:', usersError);
