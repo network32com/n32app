@@ -8,6 +8,7 @@ export async function searchUsers(query: string) {
   const { data, error } = await supabase
     .from('users')
     .select('id, full_name, headline, speciality, location, profile_photo_url, degree')
+    .neq('role', 'admin')
     .or(
       `full_name.ilike.%${query}%,headline.ilike.%${query}%,location.ilike.%${query}%,degree.ilike.%${query}%`
     )
@@ -28,15 +29,17 @@ export async function searchCases(query: string) {
     .select(
       `
       *,
-      users:user_id (
+      users:user_id!inner (
         id,
         full_name,
         profile_photo_url,
         speciality,
-        degree
+        degree,
+        role
       )
     `
     )
+    .not('users.role', 'eq', 'admin')
     .or(`title.ilike.%${query}%,case_notes.ilike.%${query}%,tags.cs.{${query}}`)
     .order('created_at', { ascending: false })
     .limit(20);
@@ -86,15 +89,17 @@ export async function filterCasesByProcedure(procedureType: string) {
     .select(
       `
       *,
-      users:user_id (
+      users:user_id!inner (
         id,
         full_name,
         profile_photo_url,
         speciality,
-        degree
+        degree,
+        role
       )
     `
     )
+    .not('users.role', 'eq', 'admin')
     .eq('procedure_type', procedureType)
     .order('created_at', { ascending: false })
     .limit(50);
@@ -114,15 +119,17 @@ export async function filterCasesByTag(tag: string) {
     .select(
       `
       *,
-      users:user_id (
+      users:user_id!inner (
         id,
         full_name,
         profile_photo_url,
         speciality,
-        degree
+        degree,
+        role
       )
     `
     )
+    .not('users.role', 'eq', 'admin')
     .contains('tags', [tag])
     .order('created_at', { ascending: false })
     .limit(50);
@@ -140,6 +147,7 @@ export async function filterUsersBySpeciality(speciality: string) {
   const { data, error } = await supabase
     .from('users')
     .select('id, full_name, headline, speciality, location, profile_photo_url, degree')
+    .neq('role', 'admin')
     .eq('speciality', speciality)
     .limit(50);
 
