@@ -32,8 +32,7 @@ export async function getFeedItems(
   if (filter === 'all' || filter === 'cases') {
     let casesQuery = supabase
       .from('cases')
-      .select('*, users!inner(id, full_name, profile_photo_url, degree, speciality, location, role)')
-      .not('users.role', 'eq', 'admin')
+      .select('*, users(id, full_name, profile_photo_url, degree, speciality, location)')
       .order('created_at', { ascending: false });
 
     if (sort === 'my_network' && followingIds.length > 0) {
@@ -57,8 +56,7 @@ export async function getFeedItems(
   if (filter === 'all' || filter === 'threads') {
     let threadsQuery = supabase
       .from('forum_threads')
-      .select('*, users!inner(id, full_name, profile_photo_url, degree, speciality, role)')
-      .not('users.role', 'eq', 'admin')
+      .select('*, users(id, full_name, profile_photo_url, degree, speciality)')
       .order('created_at', { ascending: false });
 
     if (sort === 'my_network' && followingIds.length > 0) {
@@ -102,7 +100,6 @@ export async function getFeedItems(
     const { data: professionals } = await supabase
       .from('users')
       .select('*')
-      .neq('role', 'admin')
       .order('created_at', { ascending: false })
       .limit(limit);
 
@@ -141,7 +138,6 @@ export async function getSuggestedProfessionals(userId: string, limit: number = 
   const { data: professionals } = await supabase
     .from('users')
     .select('id, full_name, profile_photo_url, degree, speciality, location, headline')
-    .neq('role', 'admin')
     .neq('id', userId)
     .not('id', 'in', `(${followingIds.join(',')})`)
     .limit(limit);
@@ -173,8 +169,7 @@ export async function getActiveDiscussions(limit: number = 5) {
 
   const { data: threads } = await supabase
     .from('forum_threads')
-    .select('id, title, category, replies_count, last_activity_at, users!inner(role)')
-    .not('users.role', 'eq', 'admin')
+    .select('id, title, category, replies_count, last_activity_at')
     .order('last_activity_at', { ascending: false })
     .limit(limit);
 

@@ -45,8 +45,7 @@ export default function CasesPage() {
     try {
       let query = supabase
         .from('cases')
-        .select('*, users!inner(role)')
-        .not('users.role', 'eq', 'admin')
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
 

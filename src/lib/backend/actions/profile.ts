@@ -75,9 +75,8 @@ export async function getFollowerCount(userId: string): Promise<number> {
 
   const { count, error } = await supabase
     .from('follows')
-    .select('id, follower:follower_id!inner(role)', { count: 'exact', head: true })
-    .eq('following_id', userId)
-    .not('follower.role', 'eq', 'admin');
+    .select('*', { count: 'exact', head: true })
+    .eq('following_id', userId);
 
   if (error) {
     throw new Error(error.message);
@@ -91,9 +90,8 @@ export async function getFollowingCount(userId: string): Promise<number> {
 
   const { count, error } = await supabase
     .from('follows')
-    .select('id, following:following_id!inner(role)', { count: 'exact', head: true })
-    .eq('follower_id', userId)
-    .not('following.role', 'eq', 'admin');
+    .select('*', { count: 'exact', head: true })
+    .eq('follower_id', userId);
 
   if (error) {
     throw new Error(error.message);

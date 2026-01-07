@@ -12,8 +12,7 @@ export async function getForumThreads(
 
   let query = supabase
     .from('forum_threads')
-    .select('*, users!inner(id, full_name, profile_photo_url, degree, speciality, role)')
-    .not('users.role', 'eq', 'admin')
+    .select('*, users(id, full_name, profile_photo_url, degree, speciality)')
     .order(sortBy === 'latest' ? 'created_at' : 'last_activity_at', { ascending: false });
 
   if (category) {
@@ -35,30 +34,11 @@ export async function getForumThread(id: string): Promise<ForumThread> {
 
   const { data, error } = await supabase
     .from('forum_threads')
-    .select('*, users(id, full_name, profile_photo_url, degree, speciality, role, headline, location)')
+    .select('*, users(id, full_name, profile_photo_url, degree, speciality, headline, location)')
     .eq('id', id)
     .single();
 
   if (error) throw error;
-
-  // Security check: Block non-admins from viewing admin threads
-  if (data.users?.role === 'admin') {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: currentUserData } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-      if (!currentUserData || currentUserData.role !== 'admin') {
-        throw new Error('Access denied: This thread is private.');
-      }
-    } else {
-      throw new Error('Access denied: This thread is private.');
-    }
-  }
-
   return data;
 }
 
@@ -67,9 +47,8 @@ export async function getThreadReplies(threadId: string): Promise<ForumReply[]> 
 
   const { data, error } = await supabase
     .from('forum_replies')
-    .select('*, users!inner(id, full_name, profile_photo_url, degree, role)')
+    .select('*, users(id, full_name, profile_photo_url, degree)')
     .eq('thread_id', threadId)
-    .not('users.role', 'eq', 'admin')
     .order('created_at', { ascending: true });
 
   if (error) throw error;

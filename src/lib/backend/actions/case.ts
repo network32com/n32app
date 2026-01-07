@@ -40,8 +40,7 @@ export async function getCase(caseId: string) {
         full_name,
         profile_photo_url,
         speciality,
-        degree,
-        role
+        degree
       )
     `)
         .eq('id', caseId)
@@ -49,24 +48,6 @@ export async function getCase(caseId: string) {
 
     if (error) {
         throw new Error(error.message);
-    }
-
-    // Security check: Block non-admins from viewing admin cases
-    if (data.users?.role === 'admin') {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-            const { data: currentUserData } = await supabase
-                .from('users')
-                .select('role')
-                .eq('id', user.id)
-                .single();
-
-            if (!currentUserData || currentUserData.role !== 'admin') {
-                throw new Error('Access denied: This case is private.');
-            }
-        } else {
-            throw new Error('Access denied: This case is private.');
-        }
     }
 
     return data;
@@ -95,16 +76,14 @@ export async function getAllCases(limit: number = 20, offset: number = 0) {
         .from('cases')
         .select(`
       *,
-      users:user_id!inner (
+      users:user_id (
         id,
         full_name,
         profile_photo_url,
         speciality,
-        degree,
-        role
+        degree
       )
     `)
-        .not('users.role', 'eq', 'admin')
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
 
